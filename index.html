@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="theme-color" content="#111111" />
+  <title>Waiter</title>
+
+  <style>
+    /* ── Reset ───────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #111111;
+      --bg2:      #1c1c1c;
+      --bg3:      #272727;
+      --border:   #333333;
+      --text:     #f2f2f2;
+      --text2:    #a0a0a0;
+      --text3:    #666666;
+      --accent:   #f59e0b;
+      --accent-d: #d97706;
+      --green:    #22c55e;
+      --amber:    #f59e0b;
+      --red:      #ef4444;
+      --blue:     #3b82f6;
+      --radius:   12px;
+      --radius-sm:8px;
+      --header-h: 56px;
+      --sheet-radius: 20px;
+    }
+    html, body {
+      height: 100%; width: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; border: none; outline: none; -webkit-tap-highlight-color: transparent; }
+    input, textarea { font-family: inherit; outline: none; border: none; }
+
+    /* ── App Shell ───────────────────────────────────────────────── */
+    #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    #app-header {
+      height: var(--header-h);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+    }
+    #btn-back {
+      width: 38px; height: 38px;
+      background: var(--bg3);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2);
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    #btn-back:active { background: var(--border); }
+    #btn-back.hidden { visibility: hidden; pointer-events: none; }
+    #header-title {
+      flex: 1;
+      font-size: 18px; font-weight: 700;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .hdr-btn {
+      height: 36px; padding: 0 14px;
+      background: var(--bg3);
+      border-radius: 9px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text2);
+      display: flex; align-items: center; gap: 5px;
+      transition: background .15s, color .15s;
+    }
+    .hdr-btn:active { background: var(--border); }
+    .hdr-btn.accent { background: var(--accent); color: #111; }
+    .hdr-btn.accent:active { background: var(--accent-d); }
+
+    /* ── Views ───────────────────────────────────────────────────── */
+    #main-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; position: relative; }
+    .view { display: none; padding: 16px; min-height: 100%; }
+    .view.active { display: block; }
+
+    /* ── Tables Grid ─────────────────────────────────────────────── */
+    #tables-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .table-card {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: border-color .15s, transform .1s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .table-card:active { transform: scale(.97); }
+    .table-card.status-free   { border-color: var(--border); }
+    .table-card.status-active { border-color: var(--green); }
+    .table-card.status-billed { border-color: var(--amber); }
+    .table-card .tc-number {
+      font-size: 26px; font-weight: 800;
+      line-height: 1;
+    }
+    .table-card .tc-label {
+      font-size: 11px; font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .table-card.status-free   .tc-label { color: var(--text3); }
+    .table-card.status-active .tc-label { color: var(--green); }
+    .table-card.status-billed .tc-label { color: var(--amber); }
+    .table-card .tc-info {
+      margin-top: 10px;
+      font-size: 13px; color: var(--text2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .table-card .tc-total {
+      margin-top: 4px;
+      font-size: 17px; font-weight: 700; color: var(--text);
+    }
+    .table-card .tc-badge {
+      position: absolute; top: 10px; right: 10px;
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .status-free   .tc-badge { background: var(--text3); }
+    .status-active .tc-badge { background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
+    .status-billed .tc-badge { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
+
+    /* ── Table / Order View ──────────────────────────────────────── */
+    .session-banner {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px;
+      background: var(--bg3);
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+      font-size: 13px; color: var(--text2);
+    }
+    .session-banner .sb-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .session-banner.active .sb-dot { background: var(--green); }
+    .session-banner.billed .sb-dot { background: var(--amber); }
+    .session-banner .sb-updated {
+      margin-left: auto;
+      font-size: 11px; font-weight: 700; color: var(--amber);
+      border: 1px solid var(--amber); border-radius: 4px; padding: 1px 6px;
+    }
+
+    .order-items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+
+    .order-item {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: flex; gap: 10px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .oi-num {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      background: rgba(245,158,11,.12);
+      border-radius: 6px; padding: 2px 6px;
+      flex-shrink: 0; align-self: flex-start;
+      margin-top: 1px;
+    }
+    .oi-body { flex: 1; min-width: 0; }
+    .oi-name { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .oi-comment { font-size: 12px; color: var(--text2); margin-top: 3px; font-style: italic; }
+    .oi-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+    .oi-price { font-size: 15px; font-weight: 700; }
+    .oi-qty { font-size: 12px; color: var(--text2); }
+    .oi-edit-btn {
+      width: 32px; height: 32px;
+      background: var(--bg3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2);
+      margin-top: 4px;
+    }
+    .oi-edit-btn:active { background: var(--border); }
+
+    .empty-order {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text3);
+    }
+    .empty-order svg { opacity: .3; margin-bottom: 12px; }
+    .empty-order p { font-size: 15px; }
+
+    /* Order total bar */
+    .order-total-bar {
+      position: sticky; bottom: 0;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      margin: 0 -16px -16px;
+    }
+    .otb-total { flex: 1; }
+    .otb-total .otb-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+    .otb-total .otb-amount { font-size: 24px; font-weight: 800; }
+    .otb-actions { display: flex; gap: 8px; }
+    .otb-btn {
+      height: 46px; padding: 0 18px;
+      border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .otb-btn.secondary { background: var(--bg3); color: var(--text2); }
+    .otb-btn.secondary:active { background: var(--border); }
+    .otb-btn.primary { background: var(--accent); color: #111; }
+    .otb-btn.primary:active { background: var(--accent-d); }
+
+    /* Add item FAB */
+    #fab-add {
+      position: fixed; bottom: 100px; right: 20px;
+      width: 56px; height: 56px;
+      border-radius: 28px;
+      background: var(--accent);
+      color: #111;
+      font-size: 28px; font-weight: 400;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(245,158,11,.4);
+      z-index: 40;
+      transition: transform .15s;
+    }
+    #fab-add:active { transform: scale(.93); }
+    #fab-add.hidden { display: none; }
+
+    /* ── History View ────────────────────────────────────────────── */
+    .history-day-header {
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text3); padding: 8px 0 6px; margin-top: 8px;
+    }
+    .history-session {
+      background: var(--bg2);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .hs-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .hs-table { font-size: 15px; font-weight: 700; }
+    .hs-time { font-size: 12px; color: var(--text3); }
+    .hs-status {
+      margin-left: auto;
+      font-size: 11px; font-weight: 700; border-radius: 5px; padding: 2px 8px;
+    }
+    .hs-status.active { background: rgba(34,197,94,.15); color: var(--green); }
+    .hs-status.billed { background: rgba(245,158,11,.15); color: var(--amber); }
+    .hs-status.closed { background: rgba(102,102,102,.15); color: var(--text3); }
+    .hs-items { font-size: 13px; color: var(--text2); margin-bottom: 8px; }
+    .hs-total { font-size: 17px; font-weight: 800; }
+    .hs-reopen {
+      margin-top: 10px;
+      width: 100%;
+      height: 36px;
+      background: var(--bg3);
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text2);
+    }
+    .hs-reopen:active { background: var(--border); }
+
+    /* ── Add-Item Bottom Sheet ───────────────────────────────────── */
+    #sheet-add {
+      position: fixed; inset: 0; z-index: 50;
+      display: flex; flex-direction: column;
+      pointer-events: none;
+    }
+    #sheet-add.open { pointer-events: all; }
+    #sheet-backdrop {
+      flex: 1;
+      background: rgba(0,0,0,.7);
+      opacity: 0;
+      transition: opacity .25s;
+    }
+    #sheet-add.open #sheet-backdrop { opacity: 1; }
+    #sheet-panel {
+      background: var(--bg2);
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      display: flex; flex-direction: column;
+      max-height: 90vh; max-height: 90dvh;
+      transform: translateY(100%);
+      transition: transform .3s cubic-bezier(.32,.72,0,1);
+    }
+    #sheet-add.open #sheet-panel { transform: translateY(0); }
+
+    .sheet-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: var(--border);
+      margin: 10px auto 14px;
+      flex-shrink: 0;
+    }
+    .sheet-search-row {
+      display: flex; gap: 8px; padding: 0 16px 12px;
+      flex-shrink: 0;
+    }
+    .sheet-search-wrap {
+      flex: 1; position: relative;
+      display: flex; align-items: center;
+    }
+    #search-input {
+      width: 100%; height: 46px;
+      background: var(--bg3);
+      border-radius: 12px;
+      padding: 0 14px 0 40px;
+      font-size: 16px; color: var(--text);
+      border: 1.5px solid var(--border);
+      transition: border-color .15s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+    .search-icon {
+      position: absolute; left: 12px;
+      pointer-events: none; color: var(--text3);
+    }
+    #btn-mic {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: var(--bg3);
+      color: var(--text2);
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid var(--border);
+      flex-shrink: 0;
+      transition: background .15s, color .15s, border-color .15s;
+      position: relative;
+    }
+    #btn-mic.listening {
+      background: rgba(239,68,68,.15);
+      border-color: var(--red);
+      color: var(--red);
+    }
+    #btn-mic .mic-pulse {
+      position: absolute; inset: -4px;
+      border-radius: 16px;
+      border: 2px solid var(--red);
+      animation: pulse-ring 1s infinite;
+      opacity: 0;
+    }
+    #btn-mic.listening .mic-pulse { opacity: 1; }
+    @keyframes pulse-ring {
+      0%   { transform: scale(1);   opacity: .7; }
+      100% { transform: scale(1.3); opacity: 0;  }
+    }
+
+    .sheet-cats {
+      display: flex; gap: 6px;
+      padding: 0 16px 12px;
+      overflow-x: auto; flex-shrink: 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .sheet-cats::-webkit-scrollbar { display: none; }
+    .cat-pill {
+      flex-shrink: 0;
+      height: 30px; padding: 0 12px;
+      border-radius: 100px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      font-size: 12px; font-weight: 600; color: var(--text2);
+      white-space: nowrap;
+      transition: background .15s, color .15s, border-color .15s;
+    }
+    .cat-pill.active { background: var(--accent); border-color: var(--accent); color: #111; }
+
+    #menu-results { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+    .menu-cat-header {
+      padding: 10px 16px 4px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text3); position: sticky; top: 0;
+      background: var(--bg2); z-index: 1;
+    }
+    .menu-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background .1s;
+    }
+    .menu-item:active { background: var(--bg3); }
+    .mi-id {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      background: rgba(245,158,11,.1);
+      border-radius: 5px; padding: 2px 5px;
+      flex-shrink: 0; min-width: 36px; text-align: center;
+    }
+    .mi-name { flex: 1; font-size: 15px; font-weight: 500; }
+    .mi-name mark { background: rgba(245,158,11,.3); color: var(--text); border-radius: 2px; }
+    .mi-price { font-size: 15px; font-weight: 700; color: var(--text); flex-shrink: 0; }
+    .mi-add {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: #111; font-size: 22px; flex-shrink: 0;
+      font-weight: 300;
+    }
+    .sheet-empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--text3); font-size: 14px;
+    }
+
+    /* ── Modals ──────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(0,0,0,.75);
+      display: flex; align-items: flex-end;
+      opacity: 0; pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal-box {
+      width: 100%;
+      background: var(--bg2);
+      border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+      padding: 20px 20px 36px;
+      transform: translateY(100%);
+      transition: transform .25s cubic-bezier(.32,.72,0,1);
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+    .modal-title {
+      font-size: 17px; font-weight: 700; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-close-btn {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text3); font-size: 16px;
+    }
+    .modal-close-btn:active { background: var(--border); }
+    .modal-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .modal-item-info {
+      background: var(--bg3);
+      border-radius: 10px; padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+    .modal-item-info .mii-name { font-size: 15px; font-weight: 600; }
+    .modal-item-info .mii-meta { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+    /* Qty stepper */
+    .qty-stepper {
+      display: flex; align-items: center; gap: 0;
+      background: var(--bg3); border-radius: 12px;
+      overflow: hidden; margin-bottom: 16px;
+      height: 52px;
+    }
+    .qty-btn {
+      width: 60px; height: 52px;
+      background: none;
+      font-size: 26px; font-weight: 300; color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      transition: background .1s;
+    }
+    .qty-btn:active { background: var(--border); }
+    .qty-value {
+      flex: 1; text-align: center;
+      font-size: 22px; font-weight: 800;
+    }
+
+    /* Comment input */
+    .modal-textarea {
+      width: 100%; min-height: 72px;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      font-size: 15px; color: var(--text);
+      resize: none; line-height: 1.4;
+      transition: border-color .15s;
+      margin-bottom: 16px;
+    }
+    .modal-textarea::placeholder { color: var(--text3); }
+    .modal-textarea:focus { border-color: var(--accent); }
+
+    .modal-actions { display: flex; gap: 10px; }
+    .modal-btn {
+      flex: 1; height: 50px; border-radius: 12px;
+      font-size: 16px; font-weight: 700;
+    }
+    .modal-btn.cancel { background: var(--bg3); color: var(--text2); }
+    .modal-btn.cancel:active { background: var(--border); }
+    .modal-btn.confirm { background: var(--accent); color: #111; }
+    .modal-btn.confirm:active { background: var(--accent-d); }
+    .modal-btn.danger { background: rgba(239,68,68,.15); color: var(--red); }
+    .modal-btn.danger:active { background: rgba(239,68,68,.25); }
+
+    /* ── Bill Overlay ────────────────────────────────────────────── */
+    #bill-overlay {
+      position: fixed; inset: 0; z-index: 70;
+      background: var(--bg);
+      display: none; flex-direction: column;
+    }
+    #bill-overlay.open { display: flex; }
+    #bill-header {
+      height: var(--header-h); display: flex; align-items: center;
+      padding: 0 16px; gap: 10px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    #bill-content { flex: 1; overflow-y: auto; padding: 20px 16px; }
+    #bill-footer {
+      padding: 14px 16px 30px;
+      border-top: 1px solid var(--border);
+      background: var(--bg2);
+      display: flex; gap: 10px; flex-shrink: 0;
+    }
+    .bill-footer-btn {
+      flex: 1; height: 50px; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .bill-footer-btn.secondary { background: var(--bg3); color: var(--text2); }
+    .bill-footer-btn.secondary:active { background: var(--border); }
+    .bill-footer-btn.primary { background: var(--accent); color: #111; }
+    .bill-footer-btn.primary:active { background: var(--accent-d); }
+    .bill-footer-btn.danger { background: rgba(239,68,68,.12); color: var(--red); }
+    .bill-footer-btn.danger:active { background: rgba(239,68,68,.2); }
+
+    /* Bill receipt styles */
+    .bill-receipt {
+      max-width: 360px; margin: 0 auto;
+      background: var(--bg2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .bill-receipt-header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px dashed var(--border);
+    }
+    .bill-receipt-header h2 { font-size: 20px; font-weight: 800; }
+    .bill-receipt-header p { font-size: 13px; color: var(--text2); margin-top: 4px; }
+    .bill-updated-tag {
+      display: inline-block; margin-top: 8px;
+      background: rgba(245,158,11,.15); color: var(--amber);
+      border-radius: 6px; padding: 3px 10px;
+      font-size: 12px; font-weight: 700;
+    }
+    .bill-line {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 10px 20px;
+      border-bottom: 1px solid rgba(255,255,255,.04);
+    }
+    .bl-num { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 36px; }
+    .bl-name { flex: 1; font-size: 14px; font-weight: 500; }
+    .bl-qty { font-size: 13px; color: var(--text2); }
+    .bl-price { font-size: 15px; font-weight: 700; flex-shrink: 0; }
+    .bl-comment { font-size: 12px; color: var(--text3); font-style: italic; padding: 0 20px 8px 64px; }
+    .bill-total-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-top: 2px solid var(--border);
+      background: var(--bg3);
+    }
+    .btr-label { font-size: 14px; font-weight: 600; color: var(--text2); }
+    .btr-amount { font-size: 26px; font-weight: 900; color: var(--accent); }
+
+    /* ── Confirm modal ───────────────────────────────────────────── */
+    #confirm-modal { z-index: 80; }
+    #confirm-modal .modal-box { padding-bottom: 40px; }
+    .confirm-text { font-size: 15px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+
+    /* ── Settings view ───────────────────────────────────────────── */
+    .settings-section { margin-bottom: 24px; }
+    .settings-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text3); margin-bottom: 8px; padding-left: 4px;
+    }
+    .settings-row {
+      background: var(--bg2);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 2px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .settings-row label { flex: 1; font-size: 15px; }
+    .settings-row input[type="number"] {
+      width: 70px; height: 36px; text-align: center;
+      background: var(--bg3); color: var(--text);
+      border-radius: 8px; border: 1px solid var(--border);
+      font-size: 16px; font-weight: 600;
+    }
+    .settings-row input[type="text"] {
+      width: 80px; height: 36px; text-align: center;
+      background: var(--bg3); color: var(--text);
+      border-radius: 8px; border: 1px solid var(--border);
+      font-size: 16px; font-weight: 600;
+    }
+    .settings-row select {
+      background: var(--bg3); color: var(--text);
+      border-radius: 8px; border: 1px solid var(--border);
+      padding: 6px 10px; font-size: 14px;
+    }
+    .settings-btn {
+      width: 100%; height: 48px; border-radius: 10px;
+      background: var(--bg2); color: var(--text2);
+      font-size: 15px; font-weight: 600; margin-bottom: 8px;
+      border: 1px solid var(--border);
+    }
+    .settings-btn:active { background: var(--bg3); }
+    .settings-btn.danger-btn { color: var(--red); border-color: rgba(239,68,68,.3); }
+    #menu-import-input { display: none; }
+
+    /* ── Misc ────────────────────────────────────────────────────── */
+    .divider { height: 1px; background: var(--border); margin: 8px 0; }
+
+    /* ── Print ───────────────────────────────────────────────────── */
+    @media print {
+      #bill-header, #bill-footer { display: none !important; }
+      #bill-overlay { position: static !important; }
+      body { background: white !important; color: black !important; }
+      .bill-receipt { background: white !important; border: 1px solid #ccc !important; color: black !important; }
+      .bill-receipt * { color: black !important; }
+      .btr-amount { color: #333 !important; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <header id="app-header">
+    <button id="btn-back" class="hidden">&#8592;</button>
+    <h1 id="header-title">Tables</h1>
+    <div id="header-actions"></div>
+  </header>
+
+  <!-- Main content -->
+  <div id="main-content">
+
+    <!-- ── Tables View ─────────────────────────────────────── -->
+    <section id="view-tables" class="view active">
+      <div id="tables-grid"></div>
+    </section>
+
+    <!-- ── Table / Order View ─────────────────────────────── -->
+    <section id="view-table" class="view">
+      <div id="session-banner" class="session-banner"></div>
+      <div id="order-items-list" class="order-items-list"></div>
+      <div id="empty-order" class="empty-order" style="display:none">
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
+          <path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p>No items yet.<br>Tap + to add.</p>
+      </div>
+      <div class="order-total-bar" id="order-total-bar">
+        <div class="otb-total">
+          <div class="otb-label">Total</div>
+          <div class="otb-amount" id="order-total">₪0</div>
+        </div>
+        <div class="otb-actions">
+          <button class="otb-btn secondary" id="btn-close-session">New guests</button>
+          <button class="otb-btn primary" id="btn-show-bill">Bill</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── History View ───────────────────────────────────── -->
+    <section id="view-history" class="view">
+      <div id="history-list"></div>
+    </section>
+
+    <!-- ── Settings View ──────────────────────────────────── -->
+    <section id="view-settings" class="view">
+      <div class="settings-section">
+        <div class="settings-label">General</div>
+        <div class="settings-row">
+          <label>Number of tables</label>
+          <input type="number" id="set-tables" value="10" min="1" max="50" />
+        </div>
+        <div class="settings-row">
+          <label>Currency symbol</label>
+          <input type="text" id="set-currency" value="₪" maxlength="3" />
+        </div>
+        <div class="settings-row">
+          <label>Speech language</label>
+          <select id="set-lang">
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="he-IL">Hebrew</option>
+            <option value="ar-SA">Arabic</option>
+            <option value="fr-FR">French</option>
+            <option value="de-DE">German</option>
+            <option value="es-ES">Spanish</option>
+            <option value="it-IT">Italian</option>
+            <option value="ru-RU">Russian</option>
+          </select>
+        </div>
+        <div class="settings-row">
+          <label>Restaurant name</label>
+          <input type="text" id="set-name" value="" placeholder="My Restaurant" style="width:160px;text-align:left;padding:6px 10px" />
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Menu</div>
+        <button class="settings-btn" id="btn-import-menu">Import menu.json</button>
+        <input type="file" id="menu-import-input" accept=".json" />
+        <button class="settings-btn" id="btn-export-menu">Export current menu</button>
+        <p style="font-size:12px;color:var(--text3);padding:4px 4px 0;line-height:1.5">
+          Menu items are loaded from a JSON file with fields:<br>
+          <code style="color:var(--accent)">id, name, category, price</code>
+        </p>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Data</div>
+        <button class="settings-btn danger-btn" id="btn-clear-today">Clear today's closed sessions</button>
+        <button class="settings-btn danger-btn" id="btn-clear-all">Clear all data</button>
+      </div>
+    </section>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- FAB -->
+<button id="fab-add" class="hidden">+</button>
+
+<!-- ── Add Item Bottom Sheet ──────────────────────────────────── -->
+<div id="sheet-add">
+  <div id="sheet-backdrop" id="sheet-backdrop"></div>
+  <div id="sheet-panel">
+    <div class="sheet-handle"></div>
+    <div class="sheet-search-row">
+      <div class="sheet-search-wrap">
+        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+          <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input id="search-input" type="text" placeholder="Search or say item name…" autocomplete="off" />
+      </div>
+      <button id="btn-mic">
+        <div class="mic-pulse"></div>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <rect x="6" y="1" width="6" height="10" rx="3" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M3 9a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+          <line x1="9" y1="15" x2="9" y2="17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="sheet-cats" id="sheet-cats"></div>
+    <div id="menu-results"></div>
+  </div>
+</div>
+
+<!-- ── Item Options Modal ─────────────────────────────────────── -->
+<div id="modal-item" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="modal-item-action-label">Add Item</span>
+      <button class="modal-close-btn" onclick="closeItemModal()">✕</button>
+    </div>
+    <div class="modal-item-info" id="modal-item-info"></div>
+    <div class="modal-label">Quantity</div>
+    <div class="qty-stepper">
+      <button class="qty-btn" id="qty-minus">−</button>
+      <div class="qty-value" id="qty-display">1</div>
+      <button class="qty-btn" id="qty-plus">+</button>
+    </div>
+    <div class="modal-label">Comment / Notes</div>
+    <textarea class="modal-textarea" id="item-comment" placeholder="e.g. no onions, well done, allergy…"></textarea>
+    <div class="modal-actions" id="modal-item-actions">
+      <button class="modal-btn cancel" onclick="closeItemModal()">Cancel</button>
+      <button class="modal-btn confirm" id="btn-confirm-item">Add to order</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Order Item Modal ──────────────────────────────────── -->
+<div id="modal-edit-item" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>Edit Item</span>
+      <button class="modal-close-btn" onclick="closeEditModal()">✕</button>
+    </div>
+    <div class="modal-item-info" id="edit-item-info"></div>
+    <div class="modal-label">Quantity</div>
+    <div class="qty-stepper">
+      <button class="qty-btn" id="edit-qty-minus">−</button>
+      <div class="qty-value" id="edit-qty-display">1</div>
+      <button class="qty-btn" id="edit-qty-plus">+</button>
+    </div>
+    <div class="modal-label">Comment / Notes</div>
+    <textarea class="modal-textarea" id="edit-comment" placeholder="e.g. no onions…"></textarea>
+    <div class="modal-actions">
+      <button class="modal-btn danger" id="btn-delete-item">Remove</button>
+      <button class="modal-btn confirm" id="btn-save-edit">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Bill Overlay ───────────────────────────────────────────── -->
+<div id="bill-overlay">
+  <div id="bill-header">
+    <button class="hdr-btn" onclick="closeBill()">&#8592; Back</button>
+    <div style="flex:1;font-size:17px;font-weight:700;text-align:center">Bill</div>
+    <button class="hdr-btn" onclick="window.print()">Print</button>
+  </div>
+  <div id="bill-content"></div>
+  <div id="bill-footer">
+    <button class="bill-footer-btn secondary" id="bill-btn-add-more">+ Add items</button>
+    <button class="bill-footer-btn danger"    id="bill-btn-new-guests">New guests</button>
+    <button class="bill-footer-btn primary"   id="bill-btn-paid">Paid ✓</button>
+  </div>
+</div>
+
+<!-- ── Confirm Modal ──────────────────────────────────────────── -->
+<div id="confirm-modal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title" id="confirm-title">Are you sure?</div>
+    <p class="confirm-text" id="confirm-text"></p>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="confirm-cancel">Cancel</button>
+      <button class="modal-btn confirm" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   DEFAULT MENU
+════════════════════════════════════════════════════════════════ */
+const DEFAULT_MENU = [
+  { id:"001", name:"Bruschetta",            category:"Starters",  price:28  },
+  { id:"002", name:"Soup of the Day",       category:"Starters",  price:32  },
+  { id:"003", name:"Chicken Wings",         category:"Starters",  price:42  },
+  { id:"004", name:"Calamari",              category:"Starters",  price:48  },
+  { id:"005", name:"Caesar Salad",          category:"Salads",    price:38  },
+  { id:"006", name:"Greek Salad",           category:"Salads",    price:36  },
+  { id:"007", name:"House Salad",           category:"Salads",    price:34  },
+  { id:"008", name:"Margherita Pizza",      category:"Pizza",     price:52  },
+  { id:"009", name:"Pepperoni Pizza",       category:"Pizza",     price:58  },
+  { id:"010", name:"Quattro Formaggi",      category:"Pizza",     price:62  },
+  { id:"011", name:"Veggie Pizza",          category:"Pizza",     price:54  },
+  { id:"012", name:"Pasta Carbonara",       category:"Pasta",     price:54  },
+  { id:"013", name:"Spaghetti Bolognese",   category:"Pasta",     price:52  },
+  { id:"014", name:"Penne Arrabbiata",      category:"Pasta",     price:48  },
+  { id:"015", name:"Grilled Salmon",        category:"Mains",     price:88  },
+  { id:"016", name:"Beef Burger",           category:"Mains",     price:68  },
+  { id:"017", name:"Grilled Chicken",       category:"Mains",     price:72  },
+  { id:"018", name:"Ribeye Steak",          category:"Mains",     price:120 },
+  { id:"019", name:"Fish & Chips",          category:"Mains",     price:74  },
+  { id:"020", name:"French Fries",          category:"Sides",     price:22  },
+  { id:"021", name:"Onion Rings",           category:"Sides",     price:24  },
+  { id:"022", name:"Garlic Bread",          category:"Sides",     price:18  },
+  { id:"023", name:"Tiramisu",              category:"Desserts",  price:32  },
+  { id:"024", name:"Chocolate Lava Cake",   category:"Desserts",  price:36  },
+  { id:"025", name:"Crème Brûlée",          category:"Desserts",  price:34  },
+  { id:"026", name:"Still Water 0.5L",      category:"Drinks",    price:10  },
+  { id:"027", name:"Sparkling Water 0.5L",  category:"Drinks",    price:12  },
+  { id:"028", name:"Coca Cola",             category:"Drinks",    price:14  },
+  { id:"029", name:"Orange Juice",          category:"Drinks",    price:16  },
+  { id:"030", name:"Lemonade",              category:"Drinks",    price:18  },
+  { id:"031", name:"Iced Tea",              category:"Drinks",    price:16  },
+  { id:"032", name:"Espresso",              category:"Coffee",    price:12  },
+  { id:"033", name:"Americano",             category:"Coffee",    price:14  },
+  { id:"034", name:"Cappuccino",            category:"Coffee",    price:16  },
+  { id:"035", name:"Latte",                 category:"Coffee",    price:18  },
+  { id:"036", name:"House Wine (Glass)",    category:"Alcohol",   price:32  },
+  { id:"037", name:"Beer (Draft)",          category:"Alcohol",   price:28  },
+  { id:"038", name:"Prosecco (Glass)",      category:"Alcohol",   price:38  },
+];
+
+/* ════════════════════════════════════════════════════════════════
+   STATE & PERSISTENCE
+════════════════════════════════════════════════════════════════ */
+const STORE_KEY     = 'waiter-app-v1';
+const MENU_KEY      = 'waiter-menu-v1';
+const SETTINGS_KEY  = 'waiter-settings-v1';
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+let menu     = JSON.parse(localStorage.getItem(MENU_KEY)) || DEFAULT_MENU;
+let settings = Object.assign(
+  { tableCount: 10, currency: '₪', speechLang: 'en-US', restaurantName: '' },
+  JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}
+);
+let sessions = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
+
+function saveData()     { localStorage.setItem(STORE_KEY,    JSON.stringify(sessions)); }
+function saveMenu()     { localStorage.setItem(MENU_KEY,     JSON.stringify(menu)); }
+function saveSettings() { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+
+/* ════════════════════════════════════════════════════════════════
+   DATA HELPERS
+════════════════════════════════════════════════════════════════ */
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function fmtPrice(n) { return settings.currency + n.toFixed(0); }
+function fmtTime(ts) {
+  return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function fmtDate(d) {
+  return new Date(d + 'T00:00:00').toLocaleDateString([], { weekday:'short', month:'short', day:'numeric' });
+}
+
+function getActiveSession(tableId) {
+  return sessions.find(s => s.tableId === tableId && s.status !== 'closed') || null;
+}
+
+function getTableStatus(tableId) {
+  const s = getActiveSession(tableId);
+  if (!s) return 'free';
+  if (s.status === 'billed') return 'billed';
+  return 'active';
+}
+
+function sessionTotal(session) {
+  return session.items.reduce((sum, i) => sum + i.price * i.qty, 0);
+}
+
+function createSession(tableId) {
+  const s = { id: uid(), tableId, date: todayStr(), startTime: Date.now(),
+               endTime: null, status: 'active', items: [], billedAt: null };
+  sessions.push(s);
+  saveData();
+  return s;
+}
+
+function getOrCreateSession(tableId) {
+  return getActiveSession(tableId) || createSession(tableId);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════════════════ */
+let currentView    = 'tables';
+let currentTableId = null;
+let currentSessionId = null;
+
+const views = { tables: 'Tables', table: '', history: 'Today', settings: 'Settings' };
+
+function navigate(view, params = {}) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  currentView = view;
+
+  const backBtn = document.getElementById('btn-back');
+  backBtn.classList.toggle('hidden', view === 'tables');
+
+  if (view === 'table' && params.tableId) {
+    currentTableId = params.tableId;
+    renderTableView();
+  } else if (view === 'history') {
+    renderHistory();
+  } else if (view === 'settings') {
+    loadSettingsForm();
+  } else {
+    renderTables();
+  }
+
+  document.getElementById('header-title').textContent =
+    view === 'table' ? 'Table ' + currentTableId :
+    view === 'history' ? 'Today\'s Orders' :
+    views[view] || 'Tables';
+
+  renderHeaderActions(view);
+  document.getElementById('fab-add').classList.toggle('hidden', view !== 'table');
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function renderHeaderActions(view) {
+  const el = document.getElementById('header-actions');
+  if (view === 'tables') {
+    el.innerHTML = `
+      <button class="hdr-btn" onclick="navigate('history')">Today</button>
+      <button class="hdr-btn" onclick="navigate('settings')">⚙</button>
+    `;
+  } else {
+    el.innerHTML = '';
+  }
+}
+
+document.getElementById('btn-back').addEventListener('click', () => {
+  if (document.getElementById('sheet-add').classList.contains('open')) { closeSheet(); return; }
+  if (currentView === 'table') navigate('tables');
+  else navigate('tables');
+});
+
+/* ════════════════════════════════════════════════════════════════
+   TABLES VIEW
+════════════════════════════════════════════════════════════════ */
+function renderTables() {
+  const grid = document.getElementById('tables-grid');
+  grid.innerHTML = '';
+  for (let t = 1; t <= settings.tableCount; t++) {
+    const status  = getTableStatus(t);
+    const session = getActiveSession(t);
+    const total   = session ? sessionTotal(session) : 0;
+    const count   = session ? session.items.reduce((s, i) => s + i.qty, 0) : 0;
+
+    const card = document.createElement('div');
+    card.className = 'table-card status-' + status;
+    card.innerHTML = `
+      <div class="tc-badge"></div>
+      <div class="tc-number">${t}</div>
+      <div class="tc-label">${status === 'free' ? 'Free' : status === 'billed' ? 'Bill ready' : 'Active'}</div>
+      ${status !== 'free' ? `
+        <div class="tc-info">${count} item${count !== 1 ? 's' : ''}</div>
+        <div class="tc-total">${fmtPrice(total)}</div>
+      ` : '<div class="tc-info" style="margin-top:16px;font-size:11px">Tap to open</div>'}
+    `;
+    card.addEventListener('click', () => navigate('table', { tableId: t }));
+    grid.appendChild(card);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TABLE / ORDER VIEW
+════════════════════════════════════════════════════════════════ */
+function renderTableView() {
+  const session = getActiveSession(currentTableId);
+  currentSessionId = session ? session.id : null;
+
+  // Banner
+  const banner = document.getElementById('session-banner');
+  if (session) {
+    const isUpdated = session.status === 'billed' && session.billedAt &&
+                      session.items.some(i => i.addedAt > session.billedAt);
+    banner.className = 'session-banner ' + session.status;
+    banner.innerHTML = `
+      <div class="sb-dot"></div>
+      <span>${session.status === 'billed' ? 'Bill issued' : 'Order open'} · Since ${fmtTime(session.startTime)}</span>
+      ${isUpdated ? '<span class="sb-updated">UPDATED</span>' : ''}
+    `;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+
+  // Items
+  const list = document.getElementById('order-items-list');
+  const empty = document.getElementById('empty-order');
+  list.innerHTML = '';
+
+  const items = session ? session.items : [];
+  if (items.length === 0) {
+    list.style.display = 'none';
+    empty.style.display = 'block';
+  } else {
+    list.style.display = 'flex';
+    empty.style.display = 'none';
+    items.forEach(item => {
+      const el = document.createElement('div');
+      el.className = 'order-item';
+      el.innerHTML = `
+        <div class="oi-num">#${item.menuItemId}</div>
+        <div class="oi-body">
+          <div class="oi-name">${escHtml(item.name)}</div>
+          ${item.comment ? `<div class="oi-comment">${escHtml(item.comment)}</div>` : ''}
+        </div>
+        <div class="oi-right">
+          <div class="oi-price">${fmtPrice(item.price * item.qty)}</div>
+          <div class="oi-qty">×${item.qty}</div>
+          <button class="oi-edit-btn" data-id="${item.id}">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+              <path d="M9 1.5l2.5 2.5L4 11.5H1.5V9L9 1.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            </svg>
+          </button>
+        </div>
+      `;
+      el.querySelector('.oi-edit-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openEditModal(item.id);
+      });
+      list.appendChild(el);
+    });
+  }
+
+  // Total
+  const total = session ? sessionTotal(session) : 0;
+  document.getElementById('order-total').textContent = fmtPrice(total);
+
+  // Button states
+  const closeBtn = document.getElementById('btn-close-session');
+  const billBtn  = document.getElementById('btn-show-bill');
+  closeBtn.style.display = session ? '' : 'none';
+  billBtn.disabled = items.length === 0;
+  billBtn.style.opacity = items.length === 0 ? '.4' : '1';
+}
+
+document.getElementById('btn-show-bill').addEventListener('click', () => {
+  const session = getActiveSession(currentTableId);
+  if (!session || session.items.length === 0) return;
+  session.status = 'billed';
+  session.billedAt = Date.now();
+  saveData();
+  renderTableView();
+  openBill(session.id);
+});
+
+document.getElementById('btn-close-session').addEventListener('click', () => {
+  showConfirm(
+    'Start new guests?',
+    'The current session will be closed and a new one started for Table ' + currentTableId + '.',
+    () => {
+      const session = getActiveSession(currentTableId);
+      if (session) { session.status = 'closed'; session.endTime = Date.now(); saveData(); }
+      navigate('table', { tableId: currentTableId });
+    }
+  );
+});
+
+/* ════════════════════════════════════════════════════════════════
+   FAB / ADD ITEM SHEET
+════════════════════════════════════════════════════════════════ */
+let selectedCat = 'All';
+
+document.getElementById('fab-add').addEventListener('click', openSheet);
+
+function openSheet() {
+  document.getElementById('sheet-add').classList.add('open');
+  document.getElementById('search-input').value = '';
+  selectedCat = 'All';
+  renderCatPills();
+  renderMenuResults('', 'All');
+  setTimeout(() => document.getElementById('search-input').focus(), 350);
+}
+
+function closeSheet() {
+  document.getElementById('sheet-add').classList.remove('open');
+  stopListening();
+}
+
+document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
+
+function renderCatPills() {
+  const cats = ['All', ...new Set(menu.map(i => i.category))];
+  const row = document.getElementById('sheet-cats');
+  row.innerHTML = cats.map(c =>
+    `<button class="cat-pill${c === selectedCat ? ' active' : ''}" data-cat="${c}">${c}</button>`
+  ).join('');
+  row.querySelectorAll('.cat-pill').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedCat = btn.dataset.cat;
+      renderCatPills();
+      renderMenuResults(document.getElementById('search-input').value, selectedCat);
+    });
+  });
+}
+
+function highlight(text, query) {
+  if (!query) return escHtml(text);
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
+  return escHtml(text).replace(re, '<mark>$1</mark>');
+}
+
+function renderMenuResults(query, cat) {
+  const q = query.trim().toLowerCase();
+  const container = document.getElementById('menu-results');
+
+  let items = menu;
+  if (cat && cat !== 'All') items = items.filter(i => i.category === cat);
+  if (q) items = items.filter(i =>
+    i.name.toLowerCase().includes(q) ||
+    i.id.includes(q) ||
+    i.category.toLowerCase().includes(q)
+  );
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="sheet-empty">No items found</div>';
+    return;
+  }
+
+  const byCategory = {};
+  items.forEach(i => {
+    if (!byCategory[i.category]) byCategory[i.category] = [];
+    byCategory[i.category].push(i);
+  });
+
+  container.innerHTML = Object.entries(byCategory).map(([cat, catItems]) => `
+    <div class="menu-cat-header">${escHtml(cat)}</div>
+    ${catItems.map(i => `
+      <div class="menu-item" data-id="${i.id}">
+        <div class="mi-id">#${i.id}</div>
+        <div class="mi-name">${highlight(i.name, q)}</div>
+        <div class="mi-price">${fmtPrice(i.price)}</div>
+        <div class="mi-add">+</div>
+      </div>
+    `).join('')}
+  `).join('');
+
+  container.querySelectorAll('.menu-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const item = menu.find(i => i.id === el.dataset.id);
+      if (item) openItemModal(item);
+    });
+  });
+}
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  renderMenuResults(e.target.value, selectedCat);
+});
+
+/* ════════════════════════════════════════════════════════════════
+   SPEECH TO TEXT
+════════════════════════════════════════════════════════════════ */
+let recognition = null;
+let isListening  = false;
+
+function startListening() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Speech recognition is not supported in this browser. Use Chrome or Safari.'); return; }
+  if (isListening) { stopListening(); return; }
+
+  recognition = new SR();
+  recognition.lang = settings.speechLang;
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isListening = true;
+    document.getElementById('btn-mic').classList.add('listening');
+    document.getElementById('search-input').placeholder = 'Listening…';
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    document.getElementById('search-input').value = transcript;
+    renderMenuResults(transcript, selectedCat);
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    document.getElementById('btn-mic').classList.remove('listening');
+    document.getElementById('search-input').placeholder = 'Search or say item name…';
+  };
+
+  recognition.onerror = (e) => {
+    console.error('Speech error:', e.error);
+    stopListening();
+  };
+
+  recognition.start();
+}
+
+function stopListening() {
+  if (recognition) { try { recognition.stop(); } catch(e) {} }
+  isListening = false;
+  document.getElementById('btn-mic').classList.remove('listening');
+  document.getElementById('search-input').placeholder = 'Search or say item name…';
+}
+
+document.getElementById('btn-mic').addEventListener('click', startListening);
+
+/* ════════════════════════════════════════════════════════════════
+   ITEM MODAL (add new item to order)
+════════════════════════════════════════════════════════════════ */
+let pendingMenuItem = null;
+let pendingQty = 1;
+
+function openItemModal(menuItem) {
+  pendingMenuItem = menuItem;
+  pendingQty = 1;
+  document.getElementById('modal-item-action-label').textContent = 'Add to Order';
+  document.getElementById('modal-item-info').innerHTML = `
+    <div class="mii-name">${escHtml(menuItem.name)}</div>
+    <div class="mii-meta">#${menuItem.id} · ${fmtPrice(menuItem.price)} each</div>
+  `;
+  document.getElementById('qty-display').textContent = 1;
+  document.getElementById('item-comment').value = '';
+  document.getElementById('btn-confirm-item').textContent = 'Add to order';
+  document.getElementById('modal-item').classList.add('open');
+}
+
+function closeItemModal() {
+  document.getElementById('modal-item').classList.remove('open');
+  pendingMenuItem = null;
+}
+
+document.getElementById('qty-minus').addEventListener('click', () => {
+  if (pendingQty > 1) { pendingQty--; document.getElementById('qty-display').textContent = pendingQty; }
+});
+document.getElementById('qty-plus').addEventListener('click', () => {
+  pendingQty++; document.getElementById('qty-display').textContent = pendingQty;
+});
+
+document.getElementById('btn-confirm-item').addEventListener('click', () => {
+  if (!pendingMenuItem) return;
+  const session = getOrCreateSession(currentTableId);
+  currentSessionId = session.id;
+
+  // If session was billed and we're adding more, mark it active again
+  if (session.status === 'billed') session.status = 'active';
+
+  const orderItem = {
+    id:           uid(),
+    menuItemId:   pendingMenuItem.id,
+    name:         pendingMenuItem.name,
+    price:        pendingMenuItem.price,
+    qty:          pendingQty,
+    comment:      document.getElementById('item-comment').value.trim(),
+    addedAt:      Date.now(),
+  };
+  session.items.push(orderItem);
+  saveData();
+  closeItemModal();
+  renderTableView();
+  // Keep sheet open for adding more items
+});
+
+/* ════════════════════════════════════════════════════════════════
+   EDIT ORDER ITEM MODAL
+════════════════════════════════════════════════════════════════ */
+let editingItemId = null;
+let editQty = 1;
+
+function openEditModal(itemId) {
+  const session = getActiveSession(currentTableId);
+  if (!session) return;
+  const item = session.items.find(i => i.id === itemId);
+  if (!item) return;
+  editingItemId = itemId;
+  editQty = item.qty;
+
+  document.getElementById('edit-item-info').innerHTML = `
+    <div class="mii-name">${escHtml(item.name)}</div>
+    <div class="mii-meta">#${item.menuItemId} · ${fmtPrice(item.price)} each</div>
+  `;
+  document.getElementById('edit-qty-display').textContent = editQty;
+  document.getElementById('edit-comment').value = item.comment || '';
+  document.getElementById('modal-edit-item').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('modal-edit-item').classList.remove('open');
+  editingItemId = null;
+}
+
+document.getElementById('edit-qty-minus').addEventListener('click', () => {
+  if (editQty > 1) { editQty--; document.getElementById('edit-qty-display').textContent = editQty; }
+});
+document.getElementById('edit-qty-plus').addEventListener('click', () => {
+  editQty++; document.getElementById('edit-qty-display').textContent = editQty;
+});
+
+document.getElementById('btn-save-edit').addEventListener('click', () => {
+  const session = getActiveSession(currentTableId);
+  if (!session) return;
+  const item = session.items.find(i => i.id === editingItemId);
+  if (!item) return;
+  item.qty     = editQty;
+  item.comment = document.getElementById('edit-comment').value.trim();
+  saveData();
+  closeEditModal();
+  renderTableView();
+  if (document.getElementById('bill-overlay').classList.contains('open')) renderBillContent(session);
+});
+
+document.getElementById('btn-delete-item').addEventListener('click', () => {
+  closeEditModal();
+  showConfirm('Remove item?', 'This item will be removed from the order.', () => {
+    const session = getActiveSession(currentTableId);
+    if (!session) return;
+    session.items = session.items.filter(i => i.id !== editingItemId);
+    saveData();
+    renderTableView();
+    editingItemId = null;
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════
+   BILL OVERLAY
+════════════════════════════════════════════════════════════════ */
+function openBill(sessionId) {
+  const session = sessions.find(s => s.id === sessionId);
+  if (!session) return;
+  renderBillContent(session);
+  document.getElementById('bill-overlay').classList.add('open');
+}
+
+function closeBill() {
+  document.getElementById('bill-overlay').classList.remove('open');
+}
+
+function renderBillContent(session) {
+  const isUpdated = session.billedAt && session.items.some(i => i.addedAt > session.billedAt);
+  const total = sessionTotal(session);
+  const restaurantName = settings.restaurantName || 'Restaurant';
+  const date = new Date(session.startTime);
+  const dateStr = date.toLocaleDateString([], { day:'numeric', month:'short', year:'numeric' });
+  const timeStr = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+  document.getElementById('bill-content').innerHTML = `
+    <div class="bill-receipt">
+      <div class="bill-receipt-header">
+        <h2>${escHtml(restaurantName)}</h2>
+        <p>Table ${session.tableId} · ${dateStr} ${timeStr}</p>
+        ${isUpdated ? '<div class="bill-updated-tag">UPDATED BILL</div>' : ''}
+      </div>
+      ${session.items.map(item => `
+        <div class="bill-line">
+          <div class="bl-num">#${item.menuItemId}</div>
+          <div class="bl-name">${escHtml(item.name)}</div>
+          <div class="bl-qty">×${item.qty}</div>
+          <div class="bl-price">${fmtPrice(item.price * item.qty)}</div>
+        </div>
+        ${item.comment ? `<div class="bl-comment">${escHtml(item.comment)}</div>` : ''}
+      `).join('')}
+      <div class="bill-total-row">
+        <div class="btr-label">TOTAL</div>
+        <div class="btr-amount">${fmtPrice(total)}</div>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('bill-btn-add-more').addEventListener('click', () => {
+  closeBill();
+  openSheet();
+});
+
+document.getElementById('bill-btn-new-guests').addEventListener('click', () => {
+  showConfirm(
+    'New guests at Table ' + currentTableId + '?',
+    'The current bill will be saved in history and the table cleared.',
+    () => {
+      const session = getActiveSession(currentTableId);
+      if (session) { session.status = 'closed'; session.endTime = Date.now(); saveData(); }
+      closeBill();
+      navigate('table', { tableId: currentTableId });
+    }
+  );
+});
+
+document.getElementById('bill-btn-paid').addEventListener('click', () => {
+  const session = getActiveSession(currentTableId);
+  if (session) { session.status = 'closed'; session.endTime = Date.now(); saveData(); }
+  closeBill();
+  navigate('tables');
+  renderTables();
+});
+
+/* ════════════════════════════════════════════════════════════════
+   HISTORY VIEW
+════════════════════════════════════════════════════════════════ */
+function renderHistory() {
+  const container = document.getElementById('history-list');
+
+  // Group by date
+  const byDate = {};
+  [...sessions].sort((a,b) => b.startTime - a.startTime).forEach(s => {
+    if (!byDate[s.date]) byDate[s.date] = [];
+    byDate[s.date].push(s);
+  });
+
+  if (Object.keys(byDate).length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:15px">No orders yet today.</div>';
+    return;
+  }
+
+  container.innerHTML = Object.entries(byDate).map(([date, dateSessions]) => {
+    const dayTotal = dateSessions.reduce((sum, s) => sum + sessionTotal(s), 0);
+    return `
+      <div class="history-day-header">${fmtDate(date)} · ${fmtPrice(dayTotal)}</div>
+      ${dateSessions.map(s => {
+        const total = sessionTotal(s);
+        const itemCount = s.items.reduce((n, i) => n + i.qty, 0);
+        const isToday = s.date === todayStr();
+        const isCurrent = getActiveSession(s.tableId)?.id === s.id;
+        return `
+          <div class="history-session">
+            <div class="hs-header">
+              <div class="hs-table">Table ${s.tableId}</div>
+              <div class="hs-time">${fmtTime(s.startTime)}${s.endTime ? ' – ' + fmtTime(s.endTime) : ''}</div>
+              <div class="hs-status ${s.status}">${s.status}</div>
+            </div>
+            <div class="hs-items">${itemCount} item${itemCount!==1?'s':''} · ${s.items.slice(0,3).map(i=>escHtml(i.name)).join(', ')}${s.items.length>3?'…':''}</div>
+            <div class="hs-total">${fmtPrice(total)}</div>
+            ${s.status === 'closed' && isToday && !isCurrent ? `
+              <button class="hs-reopen" data-sid="${s.id}">Re-open to add items</button>
+            ` : ''}
+            ${isCurrent ? `
+              <button class="hs-reopen" data-sid="${s.id}" style="color:var(--amber);border:1px solid rgba(245,158,11,.3)">View table →</button>
+            ` : ''}
+          </div>
+        `;
+      }).join('')}
+    `;
+  }).join('');
+
+  container.querySelectorAll('.hs-reopen').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sid = btn.dataset.sid;
+      const s = sessions.find(s => s.id === sid);
+      if (!s) return;
+
+      // If closed and want to re-open
+      if (s.status === 'closed') {
+        s.status = 'active';
+        s.endTime = null;
+        saveData();
+      }
+      navigate('table', { tableId: s.tableId });
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SETTINGS VIEW
+════════════════════════════════════════════════════════════════ */
+function loadSettingsForm() {
+  document.getElementById('set-tables').value   = settings.tableCount;
+  document.getElementById('set-currency').value = settings.currency;
+  document.getElementById('set-lang').value     = settings.speechLang;
+  document.getElementById('set-name').value     = settings.restaurantName || '';
+}
+
+['set-tables','set-currency','set-lang','set-name'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    settings.tableCount    = parseInt(document.getElementById('set-tables').value) || 10;
+    settings.currency      = document.getElementById('set-currency').value || '₪';
+    settings.speechLang    = document.getElementById('set-lang').value;
+    settings.restaurantName= document.getElementById('set-name').value.trim();
+    saveSettings();
+  });
+});
+
+document.getElementById('btn-import-menu').addEventListener('click', () => {
+  document.getElementById('menu-import-input').click();
+});
+
+document.getElementById('menu-import-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const parsed = JSON.parse(ev.target.result);
+      if (!Array.isArray(parsed) || !parsed[0]?.name) throw new Error('Invalid format');
+      menu = parsed;
+      saveMenu();
+      alert('Menu imported: ' + menu.length + ' items.');
+    } catch(err) {
+      alert('Could not read menu file. Make sure it\'s a valid JSON array with id, name, category, and price fields.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+document.getElementById('btn-export-menu').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(menu, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'menu.json'; a.click();
+});
+
+document.getElementById('btn-clear-today').addEventListener('click', () => {
+  showConfirm('Clear closed sessions?', 'All closed sessions from today will be permanently deleted.', () => {
+    const today = todayStr();
+    sessions = sessions.filter(s => !(s.date === today && s.status === 'closed'));
+    saveData();
+  });
+});
+
+document.getElementById('btn-clear-all').addEventListener('click', () => {
+  showConfirm('Clear ALL data?', 'All orders and sessions will be permanently deleted. This cannot be undone.', () => {
+    sessions = [];
+    saveData();
+  });
+});
+
+/* ════════════════════════════════════════════════════════════════
+   CONFIRM MODAL
+════════════════════════════════════════════════════════════════ */
+let confirmCallback = null;
+
+function showConfirm(title, text, onConfirm) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-text').textContent  = text;
+  confirmCallback = onConfirm;
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+document.getElementById('confirm-cancel').addEventListener('click', () => {
+  document.getElementById('confirm-modal').classList.remove('open');
+  confirmCallback = null;
+});
+document.getElementById('confirm-ok').addEventListener('click', () => {
+  document.getElementById('confirm-modal').classList.remove('open');
+  if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   UTILITY
+════════════════════════════════════════════════════════════════ */
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOOT
+════════════════════════════════════════════════════════════════ */
+renderTables();
+renderHeaderActions('tables');
+</script>
+</body>
+</html>
