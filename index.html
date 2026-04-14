@@ -327,35 +327,6 @@
       position: absolute; left: 12px;
       pointer-events: none; color: var(--text3);
     }
-    #btn-mic {
-      width: 46px; height: 46px;
-      border-radius: 12px;
-      background: var(--bg3);
-      color: var(--text2);
-      display: flex; align-items: center; justify-content: center;
-      border: 1.5px solid var(--border);
-      flex-shrink: 0;
-      transition: background .15s, color .15s, border-color .15s;
-      position: relative;
-    }
-    #btn-mic.listening {
-      background: rgba(239,68,68,.15);
-      border-color: var(--red);
-      color: var(--red);
-    }
-    #btn-mic .mic-pulse {
-      position: absolute; inset: -4px;
-      border-radius: 16px;
-      border: 2px solid var(--red);
-      animation: pulse-ring 1s infinite;
-      opacity: 0;
-    }
-    #btn-mic.listening .mic-pulse { opacity: 1; }
-    @keyframes pulse-ring {
-      0%   { transform: scale(1);   opacity: .7; }
-      100% { transform: scale(1.3); opacity: 0;  }
-    }
-
     .sheet-cats {
       display: flex; gap: 6px;
       padding: 0 16px 12px;
@@ -452,6 +423,85 @@
     }
     .modal-item-info .mii-name { font-size: 15px; font-weight: 600; }
     .modal-item-info .mii-meta { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+    /* Side picker (pizza) */
+    .side-options {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .side-opt {
+      flex: 1; height: 50px; border-radius: 12px;
+      background: var(--bg3);
+      border: 2px solid var(--border);
+      font-size: 15px; font-weight: 600; color: var(--text2);
+      transition: background .15s, border-color .15s, color .15s;
+    }
+    .side-opt.selected {
+      background: rgba(245,158,11,.12);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .side-opt:active { opacity: .7; }
+    .side-required-hint {
+      font-size: 11px; color: var(--red); margin-top: -10px; margin-bottom: 14px;
+      display: none;
+    }
+    .side-required-hint.visible { display: block; }
+
+    /* Side tag on order card */
+    .oi-side {
+      font-size: 12px; color: var(--accent); margin-top: 2px;
+      font-weight: 500;
+    }
+
+    .split-bar {
+      display: none;
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.3);
+      border-radius: var(--radius-sm);
+      margin: 12px 16px 0;
+      padding: 12px 14px;
+      align-items: center; gap: 8px;
+    }
+    .split-bar.visible { display: flex; }
+    .split-bar-info { flex: 1; }
+    .split-bar-label { font-size: 12px; font-weight: 600; color: var(--text2); }
+    .split-bar-amount { font-size: 20px; font-weight: 800; color: var(--accent); }
+    .split-bar-paid {
+      height: 36px; padding: 0 12px;
+      background: var(--accent); color: #111;
+      border-radius: 8px; font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .split-bar-paid:active { background: var(--accent-d); }
+    .split-bar-clear {
+      width: 32px; height: 32px;
+      font-size: 15px; color: var(--text3); background: none;
+      border-radius: 6px; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .split-bar-clear:active { background: var(--bg3); }
+
+    .bill-split-hint {
+      text-align: center; font-size: 12px; color: var(--text3);
+      padding: 8px 0 4px; font-style: italic;
+    }
+
+    .bill-settled-header {
+      padding: 10px 20px 4px;
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text3);
+    }
+    .bill-line.settled {
+      opacity: .45;
+    }
+    .bill-line.settled .bl-name,
+    .bill-line.settled .bl-qty,
+    .bill-line.settled .bl-price { text-decoration: line-through; }
+    .bill-line.settled .bl-check {
+      background: var(--bg3); border-color: var(--border);
+      font-size: 14px; color: var(--text3);
+    }
 
     /* Qty stepper */
     .qty-stepper {
@@ -554,15 +604,36 @@
       font-size: 12px; font-weight: 700;
     }
     .bill-line {
-      display: flex; align-items: baseline; gap: 8px;
-      padding: 10px 20px;
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 16px 10px 20px;
       border-bottom: 1px solid rgba(255,255,255,.04);
+      cursor: pointer;
+      transition: background .12s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .bl-num { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 36px; }
+    .bill-line.selected { background: rgba(245,158,11,.1); }
+    .bl-num { font-size: 11px; font-weight: 700; color: var(--accent); min-width: 36px; flex-shrink: 0; }
     .bl-name { flex: 1; font-size: 14px; font-weight: 500; }
-    .bl-qty { font-size: 13px; color: var(--text2); }
-    .bl-price { font-size: 15px; font-weight: 700; flex-shrink: 0; }
+    .bl-qty { font-size: 13px; color: var(--text2); flex-shrink: 0; }
+    .bl-price { font-size: 15px; font-weight: 700; flex-shrink: 0; min-width: 44px; text-align: right; }
+    .bl-check {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background .12s, border-color .12s;
+      font-size: 12px; font-weight: 800; color: #111;
+    }
+    .bill-line.sel-partial .bl-check {
+      background: rgba(245,158,11,.25); border-color: var(--accent); color: var(--accent);
+    }
+    .bill-line.sel-full .bl-check {
+      background: var(--accent); border-color: var(--accent); color: #111;
+    }
+    .bill-line.sel-partial { background: rgba(245,158,11,.05); }
+    .bill-line.sel-full    { background: rgba(245,158,11,.12); }
     .bl-comment { font-size: 12px; color: var(--text3); font-style: italic; padding: 0 20px 8px 64px; }
+    .bl-side { font-size: 12px; color: var(--accent); padding: 0 20px 8px 64px; font-weight: 500; }
     .bill-total-row {
       display: flex; align-items: center; justify-content: space-between;
       padding: 16px 20px;
@@ -664,7 +735,7 @@
       <div class="order-total-bar" id="order-total-bar">
         <div class="otb-total">
           <div class="otb-label">Total</div>
-          <div class="otb-amount" id="order-total">₪0</div>
+          <div class="otb-amount" id="order-total">€0</div>
         </div>
         <div class="otb-actions">
           <button class="otb-btn secondary" id="btn-close-session">New guests</button>
@@ -688,21 +759,7 @@
         </div>
         <div class="settings-row">
           <label>Currency symbol</label>
-          <input type="text" id="set-currency" value="₪" maxlength="3" />
-        </div>
-        <div class="settings-row">
-          <label>Speech language</label>
-          <select id="set-lang">
-            <option value="en-US">English (US)</option>
-            <option value="en-GB">English (UK)</option>
-            <option value="he-IL">Hebrew</option>
-            <option value="ar-SA">Arabic</option>
-            <option value="fr-FR">French</option>
-            <option value="de-DE">German</option>
-            <option value="es-ES">Spanish</option>
-            <option value="it-IT">Italian</option>
-            <option value="ru-RU">Russian</option>
-          </select>
+          <input type="text" id="set-currency" value="€" maxlength="3" />
         </div>
         <div class="settings-row">
           <label>Restaurant name</label>
@@ -745,16 +802,8 @@
           <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.6"/>
           <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
-        <input id="search-input" type="text" placeholder="Search or say item name…" autocomplete="off" />
+        <input id="search-input" type="text" placeholder="Search item name…" autocomplete="off" />
       </div>
-      <button id="btn-mic">
-        <div class="mic-pulse"></div>
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <rect x="6" y="1" width="6" height="10" rx="3" stroke="currentColor" stroke-width="1.7"/>
-          <path d="M3 9a6 6 0 0 0 12 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          <line x1="9" y1="15" x2="9" y2="17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-        </svg>
-      </button>
     </div>
     <div class="sheet-cats" id="sheet-cats"></div>
     <div id="menu-results"></div>
@@ -774,6 +823,14 @@
       <button class="qty-btn" id="qty-minus">−</button>
       <div class="qty-value" id="qty-display">1</div>
       <button class="qty-btn" id="qty-plus">+</button>
+    </div>
+    <div id="side-picker-section" style="display:none">
+      <div class="modal-label">Side dish</div>
+      <div class="side-options">
+        <button class="side-opt" data-side="Potatoes">🥔 Potatoes</button>
+        <button class="side-opt" data-side="Rice">🍚 Rice</button>
+      </div>
+      <div class="side-required-hint" id="side-required-hint">Please select a side dish</div>
     </div>
     <div class="modal-label">Comment / Notes</div>
     <textarea class="modal-textarea" id="item-comment" placeholder="e.g. no onions, well done, allergy…"></textarea>
@@ -797,6 +854,13 @@
       <button class="qty-btn" id="edit-qty-minus">−</button>
       <div class="qty-value" id="edit-qty-display">1</div>
       <button class="qty-btn" id="edit-qty-plus">+</button>
+    </div>
+    <div id="edit-side-picker-section" style="display:none">
+      <div class="modal-label">Side dish</div>
+      <div class="side-options">
+        <button class="edit-side-opt side-opt" data-side="Potatoes">🥔 Potatoes</button>
+        <button class="edit-side-opt side-opt" data-side="Rice">🍚 Rice</button>
+      </div>
     </div>
     <div class="modal-label">Comment / Notes</div>
     <textarea class="modal-textarea" id="edit-comment" placeholder="e.g. no onions…"></textarea>
@@ -839,44 +903,95 @@
    DEFAULT MENU
 ════════════════════════════════════════════════════════════════ */
 const DEFAULT_MENU = [
-  { id:"001", name:"Bruschetta",            category:"Starters",  price:28  },
-  { id:"002", name:"Soup of the Day",       category:"Starters",  price:32  },
-  { id:"003", name:"Chicken Wings",         category:"Starters",  price:42  },
-  { id:"004", name:"Calamari",              category:"Starters",  price:48  },
-  { id:"005", name:"Caesar Salad",          category:"Salads",    price:38  },
-  { id:"006", name:"Greek Salad",           category:"Salads",    price:36  },
-  { id:"007", name:"House Salad",           category:"Salads",    price:34  },
-  { id:"008", name:"Margherita Pizza",      category:"Pizza",     price:52  },
-  { id:"009", name:"Pepperoni Pizza",       category:"Pizza",     price:58  },
-  { id:"010", name:"Quattro Formaggi",      category:"Pizza",     price:62  },
-  { id:"011", name:"Veggie Pizza",          category:"Pizza",     price:54  },
-  { id:"012", name:"Pasta Carbonara",       category:"Pasta",     price:54  },
-  { id:"013", name:"Spaghetti Bolognese",   category:"Pasta",     price:52  },
-  { id:"014", name:"Penne Arrabbiata",      category:"Pasta",     price:48  },
-  { id:"015", name:"Grilled Salmon",        category:"Mains",     price:88  },
-  { id:"016", name:"Beef Burger",           category:"Mains",     price:68  },
-  { id:"017", name:"Grilled Chicken",       category:"Mains",     price:72  },
-  { id:"018", name:"Ribeye Steak",          category:"Mains",     price:120 },
-  { id:"019", name:"Fish & Chips",          category:"Mains",     price:74  },
-  { id:"020", name:"French Fries",          category:"Sides",     price:22  },
-  { id:"021", name:"Onion Rings",           category:"Sides",     price:24  },
-  { id:"022", name:"Garlic Bread",          category:"Sides",     price:18  },
-  { id:"023", name:"Tiramisu",              category:"Desserts",  price:32  },
-  { id:"024", name:"Chocolate Lava Cake",   category:"Desserts",  price:36  },
-  { id:"025", name:"Crème Brûlée",          category:"Desserts",  price:34  },
-  { id:"026", name:"Still Water 0.5L",      category:"Drinks",    price:10  },
-  { id:"027", name:"Sparkling Water 0.5L",  category:"Drinks",    price:12  },
-  { id:"028", name:"Coca Cola",             category:"Drinks",    price:14  },
-  { id:"029", name:"Orange Juice",          category:"Drinks",    price:16  },
-  { id:"030", name:"Lemonade",              category:"Drinks",    price:18  },
-  { id:"031", name:"Iced Tea",              category:"Drinks",    price:16  },
-  { id:"032", name:"Espresso",              category:"Coffee",    price:12  },
-  { id:"033", name:"Americano",             category:"Coffee",    price:14  },
-  { id:"034", name:"Cappuccino",            category:"Coffee",    price:16  },
-  { id:"035", name:"Latte",                 category:"Coffee",    price:18  },
-  { id:"036", name:"House Wine (Glass)",    category:"Alcohol",   price:32  },
-  { id:"037", name:"Beer (Draft)",          category:"Alcohol",   price:28  },
-  { id:"038", name:"Prosecco (Glass)",      category:"Alcohol",   price:38  },
+  { id:"001", name:"Spargelcremesuppe, Butter Croutons",                              category:"Wochenkarte",         price:8.90  },
+  { id:"002", name:"Shakshuka, pochiertes Bio Ei, Schafskäse, Baguette",             category:"Wochenkarte",         price:12.90 },
+  { id:"003", name:"Rucolasalat, Riesengarnelen, Spargel, Avocado, Erdbeer Dressing",category:"Wochenkarte",         price:25.90 },
+  { id:"004", name:"Bärlauch Tagliatelle, weißer & grüner Spargel, Parmesansauce",  category:"Wochenkarte",         price:17.80 },
+  { id:"005", name:"Beelitzer Spargel, Kartoffeln, holländische Sauce oder Nussbutter",category:"Wochenkarte",       price:22.90 },
+  { id:"006", name:"Beelitzer Spargel mit Schinkenvariation",                         category:"Wochenkarte",         price:27.90 },
+  { id:"007", name:"Beelitzer Spargel mit Kalbsschnitzel",                            category:"Wochenkarte",         price:31.20 },
+  { id:"008", name:"Beelitzer Spargel mit Lachsfilet",                                category:"Wochenkarte",         price:32.90 },
+  { id:"009", name:"Beelitzer Spargel mit Rumpsteak",                                 category:"Wochenkarte",         price:33.20 },
+  { id:"010", name:"Tiramisu, Basilikum Erdbeeren",                                   category:"Wochenkarte",         price:8.00  },
+  { id:"011", name:"Käsevariation aus fünf Sorten, Oliven, Feigensenf",              category:"Wochenkarte",         price:13.00 },
+
+  { id:"012", name:"Französisches Frühstück",                                         category:"Frühstück",          price:10.70 },
+  { id:"013", name:"Green Velvet Vegan",                                               category:"Frühstück",          price:17.00 },
+  { id:"014", name:"Gemischtes Frühstück",                                             category:"Frühstück",          price:14.80 },
+  { id:"015", name:"English Sense",                                                    category:"Frühstück",          price:17.50 },
+  { id:"016", name:"Love on the Run",                                                  category:"Frühstück",          price:16.50 },
+  { id:"017", name:"Frisch gepresste Säfte 0,2l",                                     category:"Frühstück",          price:4.80  },
+
+  { id:"018", name:"Öko-Müsli",                                                        category:"Früchte & Eier",    price:11.00 },
+  { id:"019", name:"Obstsalat",                                                         category:"Früchte & Eier",    price:10.00 },
+  { id:"020", name:"Joghurt mit frischen Früchten",                                    category:"Früchte & Eier",    price:10.00 },
+  { id:"021", name:"Hausgemachter Vanillequark mit frischen Früchten",                category:"Früchte & Eier",    price:11.00 },
+  { id:"022", name:"Cornflakes mit frischer Vollmilch",                               category:"Früchte & Eier",    price:5.90  },
+  { id:"023", name:"Rührei / Spiegeleier mit Toast & Butter",                         category:"Früchte & Eier",    price:9.00  },
+  { id:"024", name:"Rührei mit frischen Champignons, Toast & Butter",                 category:"Früchte & Eier",    price:10.30 },
+  { id:"025", name:"Spiegeleier auf gebratenem Schinken, Toast & Butter",             category:"Früchte & Eier",    price:11.00 },
+
+  { id:"026", name:"Bruschetta Classic (8 Stück)",                                    category:"Vorspeisen & Salate", price:9.20  },
+  { id:"027", name:"Rote Linsensuppe",                                                 category:"Vorspeisen & Salate", price:7.90  },
+  { id:"028", name:"Caprese",                                                           category:"Vorspeisen & Salate", price:15.80 },
+  { id:"029", name:"Gebackener Camembert mit Preiselbeeren",                           category:"Vorspeisen & Salate", price:14.50 },
+  { id:"030", name:"Schafskäsesalat mit Blattsalaten",                                category:"Vorspeisen & Salate", price:14.70 },
+  { id:"031", name:"Großer gemischter Salat",                                          category:"Vorspeisen & Salate", price:12.00 },
+  { id:"032", name:"Kleiner Beilagenfeldsalat",                                        category:"Vorspeisen & Salate", price:5.50  },
+  { id:"033", name:"Gebratene Gemüsemaultaschen an Feldsalat",                         category:"Vorspeisen & Salate", price:14.70 },
+  { id:"034", name:"Hausgemachter Hummus",                                              category:"Vorspeisen & Salate", price:12.30 },
+
+  { id:"035", name:"Ziegenkäse Gnocchi mit Trüffelfüllung",                           category:"Hauptspeisen & Pasta", price:17.00 },
+  { id:"036", name:"Spaghetti Napoli & frischem Grana Padano",                         category:"Hauptspeisen & Pasta", price:12.50 },
+  { id:"037", name:"Spaghetti mit Riesengarnelen aus der Pfanne",                      category:"Hauptspeisen & Pasta", price:21.30 },
+  { id:"038", name:"Spinat-Schafskäse-Lasagne",                                        category:"Hauptspeisen & Pasta", price:15.70 },
+  { id:"039", name:"Wiener Schnitzel vom Kalbsrücken",                                 category:"Hauptspeisen & Pasta", price:28.20 },
+  { id:"040", name:"Frisches Lachsfilet aus der Pfanne",                               category:"Hauptspeisen & Pasta", price:27.00 },
+  { id:"041", name:"Rumpsteak vom Friesisch Rind",                                     category:"Hauptspeisen & Pasta", price:29.80 },
+  { id:"042", name:"Linsen-Möhren Curry vegan",                                        category:"Hauptspeisen & Pasta", price:15.80 },
+  { id:"043", name:"Spinatkäsespätzle handgemacht",                                    category:"Hauptspeisen & Pasta", price:16.80 },
+  { id:"044", name:"Basmati-Reispfanne",                                               category:"Hauptspeisen & Pasta", price:14.80 },
+  { id:"045", name:"Handgemachte Serviettenknödel",                                    category:"Hauptspeisen & Pasta", price:18.10 },
+
+  { id:"046", name:"Hausgemachter Kaiserschmarrn",                                     category:"Dessert",              price:15.30 },
+  { id:"047", name:"Hausgemachte Crème Brûlée",                                       category:"Dessert",              price:8.50  },
+  { id:"048", name:"Hausgemachter Apfelstrudel mit Vanillesauce",                      category:"Dessert",              price:10.40 },
+  { id:"049", name:"Bananashake",                                                       category:"Dessert",              price:7.50  },
+  { id:"050", name:"Kids Cup",                                                          category:"Dessert",              price:6.70  },
+
+  { id:"051", name:"Espresso",                                                          category:"Kaffee & Tee",        price:2.20  },
+  { id:"052", name:"Doppelter Espresso",                                               category:"Kaffee & Tee",        price:3.20  },
+  { id:"053", name:"Tasse Kaffee",                                                      category:"Kaffee & Tee",        price:2.80  },
+  { id:"054", name:"Cappuccino",                                                        category:"Kaffee & Tee",        price:3.80  },
+  { id:"055", name:"Schale Milchkaffee",                                               category:"Kaffee & Tee",        price:5.00  },
+  { id:"056", name:"Verschiedene Kännchen Tee",                                        category:"Kaffee & Tee",        price:6.20  },
+  { id:"057", name:"Glas frischer Ingwertee mit Honig",                               category:"Kaffee & Tee",        price:4.80  },
+  { id:"058", name:"Heiße Schokolade mit Sahne",                                      category:"Kaffee & Tee",        price:4.80  },
+
+  { id:"059", name:"Lebensquell medium/still 1l",                                      category:"Getränke",            price:6.90  },
+  { id:"060", name:"Lebensquell medium/still 0,33l",                                  category:"Getränke",            price:3.00  },
+  { id:"061", name:"Große Apfelschorle 0,4l",                                          category:"Getränke",            price:4.70  },
+
+  { id:"062", name:"Pilsner Urquell 0,5l",                                             category:"Bier",                price:5.10  },
+  { id:"063", name:"Augustiner Hell 0,5l",                                             category:"Bier",                price:5.10  },
+  { id:"064", name:"Alpirsbacher Hefe 0,0% alkoholfrei 0,5l",                         category:"Bier",                price:4.80  },
+  { id:"065", name:"Alster mit Fassbrause 0,4l",                                      category:"Bier",                price:4.40  },
+  { id:"066", name:"DjuDju Mango Bier aus Ghana 0,33l",                               category:"Bier",                price:4.90  },
+  { id:"067", name:"Peroni Nastro Azzuro 0,0% 0,33l",                                 category:"Bier",                price:4.10  },
+  { id:"068", name:"Berliner Weiße rot/grün 0,33l",                                   category:"Bier",                price:3.80  },
+
+  { id:"069", name:"Cabernet Sauvignon 0,2l",                                          category:"Wein & Champagner",  price:6.50  },
+  { id:"070", name:"Grauburgunder Biowein 0,2l",                                      category:"Wein & Champagner",  price:6.50  },
+  { id:"071", name:"Rosé 0,2l",                                                         category:"Wein & Champagner",  price:6.50  },
+  { id:"072", name:"Legras & Haas Rosé Brut 0,75l",                                   category:"Wein & Champagner",  price:87.00 },
+  { id:"073", name:"Moët Chandon 0,375l",                                              category:"Wein & Champagner",  price:49.00 },
+
+  { id:"074", name:"Aperol Spritz",                                                     category:"Cocktails",           price:8.00  },
+  { id:"075", name:"Hugo",                                                              category:"Cocktails",           price:8.50  },
+  { id:"076", name:"Pisco Sour",                                                        category:"Cocktails",           price:12.50 },
+  { id:"077", name:"Absinth Sour",                                                      category:"Cocktails",           price:13.00 },
+  { id:"078", name:"Gin Basil Smash",                                                   category:"Cocktails",           price:12.50 },
+  { id:"079", name:"Espresso Martini",                                                  category:"Cocktails",           price:13.00 },
 ];
 
 /* ════════════════════════════════════════════════════════════════
@@ -890,7 +1005,7 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 
 let menu     = JSON.parse(localStorage.getItem(MENU_KEY)) || DEFAULT_MENU;
 let settings = Object.assign(
-  { tableCount: 10, currency: '₪', speechLang: 'en-US', restaurantName: '' },
+  { tableCount: 10, currency: '€', restaurantName: 'Schwarzes Café' },
   JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}
 );
 let sessions = JSON.parse(localStorage.getItem(STORE_KEY)) || [];
@@ -1065,6 +1180,7 @@ function renderTableView() {
         <div class="oi-num">#${item.menuItemId}</div>
         <div class="oi-body">
           <div class="oi-name">${escHtml(item.name)}</div>
+          ${item.side ? `<div class="oi-side">+ ${escHtml(item.side)}</div>` : ''}
           ${item.comment ? `<div class="oi-comment">${escHtml(item.comment)}</div>` : ''}
         </div>
         <div class="oi-right">
@@ -1137,7 +1253,6 @@ function openSheet() {
 
 function closeSheet() {
   document.getElementById('sheet-add').classList.remove('open');
-  stopListening();
 }
 
 document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
@@ -1211,68 +1326,16 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 });
 
 /* ════════════════════════════════════════════════════════════════
-   SPEECH TO TEXT
-════════════════════════════════════════════════════════════════ */
-let recognition = null;
-let isListening  = false;
-
-function startListening() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SR) { alert('Speech recognition is not supported in this browser. Use Chrome or Safari.'); return; }
-  if (isListening) { stopListening(); return; }
-
-  recognition = new SR();
-  recognition.lang = settings.speechLang;
-  recognition.continuous = false;
-  recognition.interimResults = true;
-
-  recognition.onstart = () => {
-    isListening = true;
-    document.getElementById('btn-mic').classList.add('listening');
-    document.getElementById('search-input').placeholder = 'Listening…';
-  };
-
-  recognition.onresult = (event) => {
-    let transcript = '';
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      transcript += event.results[i][0].transcript;
-    }
-    document.getElementById('search-input').value = transcript;
-    renderMenuResults(transcript, selectedCat);
-  };
-
-  recognition.onend = () => {
-    isListening = false;
-    document.getElementById('btn-mic').classList.remove('listening');
-    document.getElementById('search-input').placeholder = 'Search or say item name…';
-  };
-
-  recognition.onerror = (e) => {
-    console.error('Speech error:', e.error);
-    stopListening();
-  };
-
-  recognition.start();
-}
-
-function stopListening() {
-  if (recognition) { try { recognition.stop(); } catch(e) {} }
-  isListening = false;
-  document.getElementById('btn-mic').classList.remove('listening');
-  document.getElementById('search-input').placeholder = 'Search or say item name…';
-}
-
-document.getElementById('btn-mic').addEventListener('click', startListening);
-
-/* ════════════════════════════════════════════════════════════════
    ITEM MODAL (add new item to order)
 ════════════════════════════════════════════════════════════════ */
 let pendingMenuItem = null;
 let pendingQty = 1;
+let pendingSide = null;
 
 function openItemModal(menuItem) {
   pendingMenuItem = menuItem;
   pendingQty = 1;
+  pendingSide = null;
   document.getElementById('modal-item-action-label').textContent = 'Add to Order';
   document.getElementById('modal-item-info').innerHTML = `
     <div class="mii-name">${escHtml(menuItem.name)}</div>
@@ -1281,8 +1344,26 @@ function openItemModal(menuItem) {
   document.getElementById('qty-display').textContent = 1;
   document.getElementById('item-comment').value = '';
   document.getElementById('btn-confirm-item').textContent = 'Add to order';
+
+  // Side picker — only for Pizza category
+  const isPizza = menuItem.category === 'Pizza';
+  const sideSection = document.getElementById('side-picker-section');
+  sideSection.style.display = isPizza ? 'block' : 'none';
+  document.querySelectorAll('.side-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('side-required-hint').classList.remove('visible');
+
   document.getElementById('modal-item').classList.add('open');
 }
+
+// Side option buttons — add modal only
+document.querySelectorAll('#side-picker-section .side-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#side-picker-section .side-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    pendingSide = btn.dataset.side;
+    document.getElementById('side-required-hint').classList.remove('visible');
+  });
+});
 
 function closeItemModal() {
   document.getElementById('modal-item').classList.remove('open');
@@ -1298,6 +1379,13 @@ document.getElementById('qty-plus').addEventListener('click', () => {
 
 document.getElementById('btn-confirm-item').addEventListener('click', () => {
   if (!pendingMenuItem) return;
+
+  // Require a side selection for Pizza
+  if (pendingMenuItem.category === 'Pizza' && !pendingSide) {
+    document.getElementById('side-required-hint').classList.add('visible');
+    return;
+  }
+
   const session = getOrCreateSession(currentTableId);
   currentSessionId = session.id;
 
@@ -1305,13 +1393,14 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
   if (session.status === 'billed') session.status = 'active';
 
   const orderItem = {
-    id:           uid(),
-    menuItemId:   pendingMenuItem.id,
-    name:         pendingMenuItem.name,
-    price:        pendingMenuItem.price,
-    qty:          pendingQty,
-    comment:      document.getElementById('item-comment').value.trim(),
-    addedAt:      Date.now(),
+    id:         uid(),
+    menuItemId: pendingMenuItem.id,
+    name:       pendingMenuItem.name,
+    price:      pendingMenuItem.price,
+    qty:        pendingQty,
+    side:       pendingSide || null,
+    comment:    document.getElementById('item-comment').value.trim(),
+    addedAt:    Date.now(),
   };
   session.items.push(orderItem);
   saveData();
@@ -1325,6 +1414,7 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
 ════════════════════════════════════════════════════════════════ */
 let editingItemId = null;
 let editQty = 1;
+let editSide = null;
 
 function openEditModal(itemId) {
   const session = getActiveSession(currentTableId);
@@ -1333,6 +1423,7 @@ function openEditModal(itemId) {
   if (!item) return;
   editingItemId = itemId;
   editQty = item.qty;
+  editSide = item.side || null;
 
   document.getElementById('edit-item-info').innerHTML = `
     <div class="mii-name">${escHtml(item.name)}</div>
@@ -1340,8 +1431,29 @@ function openEditModal(itemId) {
   `;
   document.getElementById('edit-qty-display').textContent = editQty;
   document.getElementById('edit-comment').value = item.comment || '';
+
+  // Show side picker only for pizza items
+  const menuItem = menu.find(m => m.id === item.menuItemId);
+  const isPizza = menuItem && menuItem.category === 'Pizza';
+  const sideSection = document.getElementById('edit-side-picker-section');
+  sideSection.style.display = isPizza ? 'block' : 'none';
+  if (isPizza) {
+    document.querySelectorAll('.edit-side-opt').forEach(b => {
+      b.classList.toggle('selected', b.dataset.side === editSide);
+    });
+  }
+
   document.getElementById('modal-edit-item').classList.add('open');
 }
+
+// Edit-modal side option buttons
+document.querySelectorAll('.edit-side-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.edit-side-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    editSide = btn.dataset.side;
+  });
+});
 
 function closeEditModal() {
   document.getElementById('modal-edit-item').classList.remove('open');
@@ -1361,6 +1473,7 @@ document.getElementById('btn-save-edit').addEventListener('click', () => {
   const item = session.items.find(i => i.id === editingItemId);
   if (!item) return;
   item.qty     = editQty;
+  item.side    = editSide;
   item.comment = document.getElementById('edit-comment').value.trim();
   saveData();
   closeEditModal();
@@ -1369,14 +1482,14 @@ document.getElementById('btn-save-edit').addEventListener('click', () => {
 });
 
 document.getElementById('btn-delete-item').addEventListener('click', () => {
+  const idToDelete = editingItemId; // capture before closeEditModal() nulls it
   closeEditModal();
   showConfirm('Remove item?', 'This item will be removed from the order.', () => {
     const session = getActiveSession(currentTableId);
     if (!session) return;
-    session.items = session.items.filter(i => i.id !== editingItemId);
+    session.items = session.items.filter(i => i.id !== idToDelete);
     saveData();
     renderTableView();
-    editingItemId = null;
   });
 });
 
@@ -1386,6 +1499,7 @@ document.getElementById('btn-delete-item').addEventListener('click', () => {
 function openBill(sessionId) {
   const session = sessions.find(s => s.id === sessionId);
   if (!session) return;
+  splitSelected.clear();
   renderBillContent(session);
   document.getElementById('bill-overlay').classList.add('open');
 }
@@ -1394,13 +1508,46 @@ function closeBill() {
   document.getElementById('bill-overlay').classList.remove('open');
 }
 
+// Map<itemId, selectedCount> — tracks how many units of each item are in the current split
+let splitSelected = new Map();
+
 function renderBillContent(session) {
   const isUpdated = session.billedAt && session.items.some(i => i.addedAt > session.billedAt);
-  const total = sessionTotal(session);
   const restaurantName = settings.restaurantName || 'Restaurant';
   const date = new Date(session.startTime);
   const dateStr = date.toLocaleDateString([], { day:'numeric', month:'short', year:'numeric' });
   const timeStr = date.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+
+  // Separate owed vs fully settled items
+  const owedItems    = session.items.filter(i => (i.qty - (i.paidQty || 0)) > 0);
+  const settledItems = session.items.filter(i => (i.paidQty || 0) >= i.qty);
+  const owedTotal    = owedItems.reduce((sum, i) => sum + i.price * (i.qty - (i.paidQty || 0)), 0);
+
+  const splitTotal = getSplitTotal(session);
+  const splitUnits = [...splitSelected.values()].reduce((a, b) => a + b, 0);
+
+  function billLineHtml(item, isSettled) {
+    const owed     = item.qty - (item.paidQty || 0);
+    const showQty  = isSettled ? item.qty : owed;
+    const lineAmt  = isSettled ? item.price * item.qty : item.price * owed;
+    const selCount = splitSelected.get(item.id) || 0;
+    const selClass = isSettled ? 'settled'
+                   : selCount === 0        ? ''
+                   : selCount >= owed      ? ' sel-full'
+                   : ' sel-partial';
+    const checkContent = isSettled ? '✓' : (selCount > 0 ? selCount : '');
+    return `
+      <div class="bill-line${selClass}" data-item-id="${item.id}"${isSettled ? ' data-settled="1"' : ''}>
+        <div class="bl-num">#${item.menuItemId}</div>
+        <div class="bl-name">${escHtml(item.name)}</div>
+        <div class="bl-qty">×${showQty}</div>
+        <div class="bl-price">${fmtPrice(lineAmt)}</div>
+        <div class="bl-check">${checkContent}</div>
+      </div>
+      ${item.side    ? `<div class="bl-side">+ ${escHtml(item.side)}</div>`    : ''}
+      ${item.comment ? `<div class="bl-comment">${escHtml(item.comment)}</div>` : ''}
+    `;
+  }
 
   document.getElementById('bill-content').innerHTML = `
     <div class="bill-receipt">
@@ -1409,21 +1556,83 @@ function renderBillContent(session) {
         <p>Table ${session.tableId} · ${dateStr} ${timeStr}</p>
         ${isUpdated ? '<div class="bill-updated-tag">UPDATED BILL</div>' : ''}
       </div>
-      ${session.items.map(item => `
-        <div class="bill-line">
-          <div class="bl-num">#${item.menuItemId}</div>
-          <div class="bl-name">${escHtml(item.name)}</div>
-          <div class="bl-qty">×${item.qty}</div>
-          <div class="bl-price">${fmtPrice(item.price * item.qty)}</div>
-        </div>
-        ${item.comment ? `<div class="bl-comment">${escHtml(item.comment)}</div>` : ''}
-      `).join('')}
+      ${owedItems.map(i => billLineHtml(i, false)).join('')}
+      ${settledItems.length > 0 ? `
+        <div class="bill-settled-header">Settled — tap to undo</div>
+        ${settledItems.map(i => billLineHtml(i, true)).join('')}
+      ` : ''}
       <div class="bill-total-row">
-        <div class="btr-label">TOTAL</div>
-        <div class="btr-amount">${fmtPrice(total)}</div>
+        <div class="btr-label">${settledItems.length > 0 ? 'STILL OWED' : 'TOTAL'}</div>
+        <div class="btr-amount">${fmtPrice(owedTotal)}</div>
       </div>
     </div>
+    <div class="bill-split-hint">Tap items to count per person · each tap adds 1 unit</div>
+    <div class="split-bar${splitUnits > 0 ? ' visible' : ''}" id="split-bar">
+      <div class="split-bar-info">
+        <div class="split-bar-label">${splitUnits} item${splitUnits !== 1 ? 's' : ''} selected</div>
+        <div class="split-bar-amount">${fmtPrice(splitTotal)}</div>
+      </div>
+      <button class="split-bar-paid" id="split-mark-paid">Mark Paid</button>
+      <button class="split-bar-clear" id="split-clear">✕</button>
+    </div>
   `;
+
+  // Owed item taps — cycle split count 0 → 1 → 2 → ... → owed → 0
+  document.querySelectorAll('.bill-line:not([data-settled])[data-item-id]').forEach(el => {
+    el.addEventListener('click', () => {
+      const id   = el.dataset.itemId;
+      const item = session.items.find(i => i.id === id);
+      if (!item) return;
+      const owed    = item.qty - (item.paidQty || 0);
+      const current = splitSelected.get(id) || 0;
+      const next    = current >= owed ? 0 : current + 1;
+      if (next === 0) splitSelected.delete(id);
+      else            splitSelected.set(id, next);
+      renderBillContent(session);
+    });
+  });
+
+  // Settled item taps — undo (restore to owed)
+  document.querySelectorAll('.bill-line[data-settled]').forEach(el => {
+    el.addEventListener('click', () => {
+      const item = session.items.find(i => i.id === el.dataset.itemId);
+      if (item) { item.paidQty = 0; saveData(); renderBillContent(session); }
+    });
+  });
+
+  // Mark Paid — write selected counts into paidQty
+  const paidBtn = document.getElementById('split-mark-paid');
+  if (paidBtn) paidBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    markSelectedPaid(session);
+  });
+
+  // Clear selection
+  const clearBtn = document.getElementById('split-clear');
+  if (clearBtn) clearBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    splitSelected.clear();
+    renderBillContent(session);
+  });
+}
+
+function getSplitTotal(session) {
+  let total = 0;
+  splitSelected.forEach((count, id) => {
+    const item = session.items.find(i => i.id === id);
+    if (item) total += item.price * count;
+  });
+  return total;
+}
+
+function markSelectedPaid(session) {
+  splitSelected.forEach((count, id) => {
+    const item = session.items.find(i => i.id === id);
+    if (item) item.paidQty = Math.min((item.paidQty || 0) + count, item.qty);
+  });
+  splitSelected.clear();
+  saveData();
+  renderBillContent(session);
 }
 
 document.getElementById('bill-btn-add-more').addEventListener('click', () => {
@@ -1523,15 +1732,13 @@ function renderHistory() {
 function loadSettingsForm() {
   document.getElementById('set-tables').value   = settings.tableCount;
   document.getElementById('set-currency').value = settings.currency;
-  document.getElementById('set-lang').value     = settings.speechLang;
   document.getElementById('set-name').value     = settings.restaurantName || '';
 }
 
-['set-tables','set-currency','set-lang','set-name'].forEach(id => {
+['set-tables','set-currency','set-name'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => {
     settings.tableCount    = parseInt(document.getElementById('set-tables').value) || 10;
     settings.currency      = document.getElementById('set-currency').value || '₪';
-    settings.speechLang    = document.getElementById('set-lang').value;
     settings.restaurantName= document.getElementById('set-name').value.trim();
     saveSettings();
   });
