@@ -200,6 +200,32 @@
     }
     .empty-order svg { opacity: .3; margin-bottom: 12px; }
     .empty-order p { font-size: 15px; }
+    .empty-order-cta {
+      display: flex; flex-direction: column; align-items: center;
+      margin: 24px auto 0;
+      width: 100%; max-width: 280px;
+      background: var(--accent);
+      border-radius: var(--radius);
+      padding: 28px 20px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity .15s, transform .1s;
+    }
+    .empty-order-cta:active { opacity: .85; transform: scale(.98); }
+    .empty-order-cta .cta-plus {
+      font-size: 52px; font-weight: 300; color: #111;
+      line-height: 1; margin-bottom: 10px;
+    }
+    .empty-order-cta .cta-label {
+      font-size: 16px; font-weight: 700; color: #111;
+    }
+    #fab-add.fab-empty {
+      width: 72px; height: 72px;
+      border-radius: 36px;
+      font-size: 36px;
+      bottom: 110px; right: 20px;
+      box-shadow: 0 6px 28px rgba(245,158,11,.55);
+    }
 
     /* Order total bar */
     .order-total-bar {
@@ -317,7 +343,7 @@
       width: 100%; height: 46px;
       background: var(--bg3);
       border-radius: 12px;
-      padding: 0 14px 0 40px;
+      padding: 0 40px 0 40px;
       font-size: 16px; color: var(--text);
       border: 1.5px solid var(--border);
       transition: border-color .15s;
@@ -327,6 +353,19 @@
       position: absolute; left: 12px;
       pointer-events: none; color: var(--text3);
     }
+    #search-clear {
+      position: absolute; right: 10px;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--border);
+      color: var(--text2);
+      font-size: 14px; font-weight: 700;
+      display: none; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    #search-clear.visible { display: flex; }
+    #search-clear:active { background: var(--text3); }
     .sheet-cats {
       display: flex; gap: 6px;
       padding: 0 16px 12px;
@@ -723,11 +762,11 @@
       <div id="session-banner" class="session-banner"></div>
       <div id="order-items-list" class="order-items-list"></div>
       <div id="empty-order" class="empty-order" style="display:none">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-          <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2"/>
-          <path d="M16 24h16M24 16v16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <p>No items yet.<br>Tap + to add.</p>
+        <p>No items yet.</p>
+        <div class="empty-order-cta" id="empty-order-cta">
+          <div class="cta-plus">+</div>
+          <div class="cta-label">Add items</div>
+        </div>
       </div>
       <div class="order-total-bar" id="order-total-bar">
         <div class="otb-total">
@@ -800,6 +839,7 @@
           <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
         </svg>
         <input id="search-input" type="text" placeholder="Search item name…" autocomplete="off" />
+        <button id="search-clear">✕</button>
       </div>
     </div>
     <div class="sheet-cats" id="sheet-cats"></div>
@@ -1539,12 +1579,16 @@ function renderTableView() {
   list.innerHTML = '';
 
   const items = session ? session.items : [];
+  const fab = document.getElementById('fab-add');
   if (items.length === 0) {
     list.style.display = 'none';
     empty.style.display = 'block';
+    fab.classList.add('fab-empty');
+    document.getElementById('empty-order-cta').onclick = openSheet;
   } else {
     list.style.display = 'flex';
     empty.style.display = 'none';
+    fab.classList.remove('fab-empty');
     items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'order-item';
@@ -1617,6 +1661,7 @@ document.getElementById('fab-add').addEventListener('click', openSheet);
 function openSheet() {
   document.getElementById('sheet-add').classList.add('open');
   document.getElementById('search-input').value = '';
+  document.getElementById('search-clear').classList.remove('visible');
   selectedCat = 'All';
   renderCatPills();
   renderMenuResults('', 'All');
@@ -1638,8 +1683,11 @@ function renderCatPills() {
   row.querySelectorAll('.cat-pill').forEach(btn => {
     btn.addEventListener('click', () => {
       selectedCat = btn.dataset.cat;
+      const input = document.getElementById('search-input');
+      input.value = '';
+      searchClear.classList.remove('visible');
       renderCatPills();
-      renderMenuResults(document.getElementById('search-input').value, selectedCat);
+      renderMenuResults('', selectedCat);
     });
   });
 }
@@ -1655,7 +1703,7 @@ function renderMenuResults(query, cat) {
   const container = document.getElementById('menu-results');
 
   let items = menu;
-  if (cat && cat !== 'All') items = items.filter(i => i.category === cat);
+  if (!q && cat && cat !== 'All') items = items.filter(i => i.category === cat);
   if (q) items = items.filter(i =>
     i.name.toLowerCase().includes(q) ||
     i.id.includes(q) ||
@@ -1693,8 +1741,23 @@ function renderMenuResults(query, cat) {
   });
 }
 
+const searchClear = document.getElementById('search-clear');
 document.getElementById('search-input').addEventListener('input', (e) => {
-  renderMenuResults(e.target.value, selectedCat);
+  const q = e.target.value;
+  searchClear.classList.toggle('visible', q.length > 0);
+  if (q.length > 0 && selectedCat !== 'All') {
+    selectedCat = 'All';
+    renderCatPills();
+  }
+  renderMenuResults(q, selectedCat);
+});
+
+searchClear.addEventListener('click', () => {
+  const input = document.getElementById('search-input');
+  input.value = '';
+  searchClear.classList.remove('visible');
+  input.focus();
+  renderMenuResults('', selectedCat);
 });
 
 /* ════════════════════════════════════════════════════════════════
