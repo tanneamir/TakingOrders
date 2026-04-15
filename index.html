@@ -367,20 +367,17 @@
     #search-clear.visible { display: flex; }
     #search-clear:active { background: var(--text3); }
     .sheet-cats {
-      display: flex; gap: 6px;
-      padding: 0 16px 12px;
-      overflow-x: auto; flex-shrink: 0;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 0 16px 14px;
+      flex-shrink: 0;
     }
-    .sheet-cats::-webkit-scrollbar { display: none; }
     .cat-pill {
       flex-shrink: 0;
-      height: 30px; padding: 0 12px;
+      height: 36px; padding: 0 16px;
       border-radius: 100px;
       background: var(--bg3);
       border: 1px solid var(--border);
-      font-size: 12px; font-weight: 600; color: var(--text2);
+      font-size: 13px; font-weight: 600; color: var(--text2);
       white-space: nowrap;
       transition: background .15s, color .15s, border-color .15s;
     }
@@ -1843,7 +1840,15 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
   saveData();
   closeItemModal();
   renderTableView();
-  // Keep sheet open for adding more items
+  // Keep sheet open for adding more items — reset search
+  const input = document.getElementById('search-input');
+  input.value = '';
+  searchClear.classList.remove('visible');
+  if (selectedCat !== 'All') {
+    selectedCat = 'All';
+    renderCatPills();
+  }
+  renderMenuResults('', selectedCat);
 });
 
 /* ════════════════════════════════════════════════════════════════
