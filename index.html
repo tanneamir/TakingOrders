@@ -424,31 +424,28 @@
     .modal-item-info .mii-name { font-size: 15px; font-weight: 600; }
     .modal-item-info .mii-meta { font-size: 13px; color: var(--text2); margin-top: 4px; }
 
-    /* Side picker (pizza) */
-    .side-options {
-      display: flex; gap: 8px; margin-bottom: 16px;
+    /* Options picker */
+    .item-options {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
     }
-    .side-opt {
-      flex: 1; height: 50px; border-radius: 12px;
+    .opt-pill {
+      height: 36px; padding: 0 14px;
+      border-radius: 100px;
       background: var(--bg3);
       border: 2px solid var(--border);
-      font-size: 15px; font-weight: 600; color: var(--text2);
+      font-size: 13px; font-weight: 600; color: var(--text2);
+      white-space: nowrap;
       transition: background .15s, border-color .15s, color .15s;
     }
-    .side-opt.selected {
+    .opt-pill.selected {
       background: rgba(245,158,11,.12);
       border-color: var(--accent);
       color: var(--accent);
     }
-    .side-opt:active { opacity: .7; }
-    .side-required-hint {
-      font-size: 11px; color: var(--red); margin-top: -10px; margin-bottom: 14px;
-      display: none;
-    }
-    .side-required-hint.visible { display: block; }
+    .opt-pill:active { opacity: .7; }
 
-    /* Side tag on order card */
-    .oi-side {
+    /* Options tags on order card */
+    .oi-options {
       font-size: 12px; color: var(--accent); margin-top: 2px;
       font-weight: 500;
     }
@@ -824,13 +821,9 @@
       <div class="qty-value" id="qty-display">1</div>
       <button class="qty-btn" id="qty-plus">+</button>
     </div>
-    <div id="side-picker-section" style="display:none">
-      <div class="modal-label">Side dish</div>
-      <div class="side-options">
-        <button class="side-opt" data-side="Potatoes">🥔 Potatoes</button>
-        <button class="side-opt" data-side="Rice">🍚 Rice</button>
-      </div>
-      <div class="side-required-hint" id="side-required-hint">Please select a side dish</div>
+    <div id="options-picker-section" style="display:none">
+      <div class="modal-label">Options</div>
+      <div class="item-options" id="options-pills"></div>
     </div>
     <div class="modal-label">Comment / Notes</div>
     <textarea class="modal-textarea" id="item-comment" placeholder="e.g. no onions, well done, allergy…"></textarea>
@@ -855,12 +848,9 @@
       <div class="qty-value" id="edit-qty-display">1</div>
       <button class="qty-btn" id="edit-qty-plus">+</button>
     </div>
-    <div id="edit-side-picker-section" style="display:none">
-      <div class="modal-label">Side dish</div>
-      <div class="side-options">
-        <button class="edit-side-opt side-opt" data-side="Potatoes">🥔 Potatoes</button>
-        <button class="edit-side-opt side-opt" data-side="Rice">🍚 Rice</button>
-      </div>
+    <div id="edit-options-picker-section" style="display:none">
+      <div class="modal-label">Options</div>
+      <div class="item-options" id="edit-options-pills"></div>
     </div>
     <div class="modal-label">Comment / Notes</div>
     <textarea class="modal-textarea" id="edit-comment" placeholder="e.g. no onions…"></textarea>
@@ -903,95 +893,32 @@
    DEFAULT MENU
 ════════════════════════════════════════════════════════════════ */
 const DEFAULT_MENU = [
-  { id:"001", name:"Spargelcremesuppe, Butter Croutons",                              category:"Wochenkarte",         price:8.90  },
-  { id:"002", name:"Shakshuka, pochiertes Bio Ei, Schafskäse, Baguette",             category:"Wochenkarte",         price:12.90 },
-  { id:"003", name:"Rucolasalat, Riesengarnelen, Spargel, Avocado, Erdbeer Dressing",category:"Wochenkarte",         price:25.90 },
-  { id:"004", name:"Bärlauch Tagliatelle, weißer & grüner Spargel, Parmesansauce",  category:"Wochenkarte",         price:17.80 },
-  { id:"005", name:"Beelitzer Spargel, Kartoffeln, holländische Sauce oder Nussbutter",category:"Wochenkarte",       price:22.90 },
-  { id:"006", name:"Beelitzer Spargel mit Schinkenvariation",                         category:"Wochenkarte",         price:27.90 },
-  { id:"007", name:"Beelitzer Spargel mit Kalbsschnitzel",                            category:"Wochenkarte",         price:31.20 },
-  { id:"008", name:"Beelitzer Spargel mit Lachsfilet",                                category:"Wochenkarte",         price:32.90 },
-  { id:"009", name:"Beelitzer Spargel mit Rumpsteak",                                 category:"Wochenkarte",         price:33.20 },
-  { id:"010", name:"Tiramisu, Basilikum Erdbeeren",                                   category:"Wochenkarte",         price:8.00  },
-  { id:"011", name:"Käsevariation aus fünf Sorten, Oliven, Feigensenf",              category:"Wochenkarte",         price:13.00 },
-
-  { id:"012", name:"Französisches Frühstück",                                         category:"Frühstück",          price:10.70 },
-  { id:"013", name:"Green Velvet Vegan",                                               category:"Frühstück",          price:17.00 },
-  { id:"014", name:"Gemischtes Frühstück",                                             category:"Frühstück",          price:14.80 },
-  { id:"015", name:"English Sense",                                                    category:"Frühstück",          price:17.50 },
-  { id:"016", name:"Love on the Run",                                                  category:"Frühstück",          price:16.50 },
-  { id:"017", name:"Frisch gepresste Säfte 0,2l",                                     category:"Frühstück",          price:4.80  },
-
-  { id:"018", name:"Öko-Müsli",                                                        category:"Früchte & Eier",    price:11.00 },
-  { id:"019", name:"Obstsalat",                                                         category:"Früchte & Eier",    price:10.00 },
-  { id:"020", name:"Joghurt mit frischen Früchten",                                    category:"Früchte & Eier",    price:10.00 },
-  { id:"021", name:"Hausgemachter Vanillequark mit frischen Früchten",                category:"Früchte & Eier",    price:11.00 },
-  { id:"022", name:"Cornflakes mit frischer Vollmilch",                               category:"Früchte & Eier",    price:5.90  },
-  { id:"023", name:"Rührei / Spiegeleier mit Toast & Butter",                         category:"Früchte & Eier",    price:9.00  },
-  { id:"024", name:"Rührei mit frischen Champignons, Toast & Butter",                 category:"Früchte & Eier",    price:10.30 },
-  { id:"025", name:"Spiegeleier auf gebratenem Schinken, Toast & Butter",             category:"Früchte & Eier",    price:11.00 },
-
-  { id:"026", name:"Bruschetta Classic (8 Stück)",                                    category:"Vorspeisen & Salate", price:9.20  },
-  { id:"027", name:"Rote Linsensuppe",                                                 category:"Vorspeisen & Salate", price:7.90  },
-  { id:"028", name:"Caprese",                                                           category:"Vorspeisen & Salate", price:15.80 },
-  { id:"029", name:"Gebackener Camembert mit Preiselbeeren",                           category:"Vorspeisen & Salate", price:14.50 },
-  { id:"030", name:"Schafskäsesalat mit Blattsalaten",                                category:"Vorspeisen & Salate", price:14.70 },
-  { id:"031", name:"Großer gemischter Salat",                                          category:"Vorspeisen & Salate", price:12.00 },
-  { id:"032", name:"Kleiner Beilagenfeldsalat",                                        category:"Vorspeisen & Salate", price:5.50  },
-  { id:"033", name:"Gebratene Gemüsemaultaschen an Feldsalat",                         category:"Vorspeisen & Salate", price:14.70 },
-  { id:"034", name:"Hausgemachter Hummus",                                              category:"Vorspeisen & Salate", price:12.30 },
-
-  { id:"035", name:"Ziegenkäse Gnocchi mit Trüffelfüllung",                           category:"Hauptspeisen & Pasta", price:17.00 },
-  { id:"036", name:"Spaghetti Napoli & frischem Grana Padano",                         category:"Hauptspeisen & Pasta", price:12.50 },
-  { id:"037", name:"Spaghetti mit Riesengarnelen aus der Pfanne",                      category:"Hauptspeisen & Pasta", price:21.30 },
-  { id:"038", name:"Spinat-Schafskäse-Lasagne",                                        category:"Hauptspeisen & Pasta", price:15.70 },
-  { id:"039", name:"Wiener Schnitzel vom Kalbsrücken",                                 category:"Hauptspeisen & Pasta", price:28.20 },
-  { id:"040", name:"Frisches Lachsfilet aus der Pfanne",                               category:"Hauptspeisen & Pasta", price:27.00 },
-  { id:"041", name:"Rumpsteak vom Friesisch Rind",                                     category:"Hauptspeisen & Pasta", price:29.80 },
-  { id:"042", name:"Linsen-Möhren Curry vegan",                                        category:"Hauptspeisen & Pasta", price:15.80 },
-  { id:"043", name:"Spinatkäsespätzle handgemacht",                                    category:"Hauptspeisen & Pasta", price:16.80 },
-  { id:"044", name:"Basmati-Reispfanne",                                               category:"Hauptspeisen & Pasta", price:14.80 },
-  { id:"045", name:"Handgemachte Serviettenknödel",                                    category:"Hauptspeisen & Pasta", price:18.10 },
-
-  { id:"046", name:"Hausgemachter Kaiserschmarrn",                                     category:"Dessert",              price:15.30 },
-  { id:"047", name:"Hausgemachte Crème Brûlée",                                       category:"Dessert",              price:8.50  },
-  { id:"048", name:"Hausgemachter Apfelstrudel mit Vanillesauce",                      category:"Dessert",              price:10.40 },
-  { id:"049", name:"Bananashake",                                                       category:"Dessert",              price:7.50  },
-  { id:"050", name:"Kids Cup",                                                          category:"Dessert",              price:6.70  },
-
-  { id:"051", name:"Espresso",                                                          category:"Kaffee & Tee",        price:2.20  },
-  { id:"052", name:"Doppelter Espresso",                                               category:"Kaffee & Tee",        price:3.20  },
-  { id:"053", name:"Tasse Kaffee",                                                      category:"Kaffee & Tee",        price:2.80  },
-  { id:"054", name:"Cappuccino",                                                        category:"Kaffee & Tee",        price:3.80  },
-  { id:"055", name:"Schale Milchkaffee",                                               category:"Kaffee & Tee",        price:5.00  },
-  { id:"056", name:"Verschiedene Kännchen Tee",                                        category:"Kaffee & Tee",        price:6.20  },
-  { id:"057", name:"Glas frischer Ingwertee mit Honig",                               category:"Kaffee & Tee",        price:4.80  },
-  { id:"058", name:"Heiße Schokolade mit Sahne",                                      category:"Kaffee & Tee",        price:4.80  },
-
-  { id:"059", name:"Lebensquell medium/still 1l",                                      category:"Getränke",            price:6.90  },
-  { id:"060", name:"Lebensquell medium/still 0,33l",                                  category:"Getränke",            price:3.00  },
-  { id:"061", name:"Große Apfelschorle 0,4l",                                          category:"Getränke",            price:4.70  },
-
-  { id:"062", name:"Pilsner Urquell 0,5l",                                             category:"Bier",                price:5.10  },
-  { id:"063", name:"Augustiner Hell 0,5l",                                             category:"Bier",                price:5.10  },
-  { id:"064", name:"Alpirsbacher Hefe 0,0% alkoholfrei 0,5l",                         category:"Bier",                price:4.80  },
-  { id:"065", name:"Alster mit Fassbrause 0,4l",                                      category:"Bier",                price:4.40  },
-  { id:"066", name:"DjuDju Mango Bier aus Ghana 0,33l",                               category:"Bier",                price:4.90  },
-  { id:"067", name:"Peroni Nastro Azzuro 0,0% 0,33l",                                 category:"Bier",                price:4.10  },
-  { id:"068", name:"Berliner Weiße rot/grün 0,33l",                                   category:"Bier",                price:3.80  },
-
-  { id:"069", name:"Cabernet Sauvignon 0,2l",                                          category:"Wein & Champagner",  price:6.50  },
-  { id:"070", name:"Grauburgunder Biowein 0,2l",                                      category:"Wein & Champagner",  price:6.50  },
-  { id:"071", name:"Rosé 0,2l",                                                         category:"Wein & Champagner",  price:6.50  },
-  { id:"072", name:"Legras & Haas Rosé Brut 0,75l",                                   category:"Wein & Champagner",  price:87.00 },
-  { id:"073", name:"Moët Chandon 0,375l",                                              category:"Wein & Champagner",  price:49.00 },
-
-  { id:"074", name:"Aperol Spritz",                                                     category:"Cocktails",           price:8.00  },
-  { id:"075", name:"Hugo",                                                              category:"Cocktails",           price:8.50  },
-  { id:"076", name:"Pisco Sour",                                                        category:"Cocktails",           price:12.50 },
-  { id:"077", name:"Absinth Sour",                                                      category:"Cocktails",           price:13.00 },
-  { id:"078", name:"Gin Basil Smash",                                                   category:"Cocktails",           price:12.50 },
-  { id:"079", name:"Espresso Martini",                                                  category:"Cocktails",           price:13.00 },
+  { id:"1",  name:"Espresso",                      category:"Hot Drinks", price:2.20, options:["Macchiato","Milch","Koffeinfrei"] },
+  { id:"2",  name:"Espresso + Sahne",              category:"Hot Drinks", price:0,    options:["Koffeinfrei"] },
+  { id:"3",  name:"Dopp. Espresso",                category:"Hot Drinks", price:3.20, options:["Macchiato","Milch","Koffeinfrei"] },
+  { id:"4",  name:"Dopp. Espresso + Sahne",        category:"Hot Drinks", price:0,    options:["Koffeinfrei"] },
+  { id:"5",  name:"Verläng. Espress",              category:"Hot Drinks", price:0,    options:["Macchiato","Milch","Koffeinfrei"] },
+  { id:"6",  name:"Verläng. Espresso + Sahne",     category:"Hot Drinks", price:0,    options:["Koffeinfrei"] },
+  { id:"8",  name:"Cappuccino",                    category:"Hot Drinks", price:3.80, options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"9",  name:"Dopp. Cappu",                   category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"48", name:"Cappuccino Koffeinfrei",        category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"12", name:"Flat White",                    category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"11", name:"Milchkaffe",                    category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"49", name:"Milchkaffee Koffeinfrei",       category:"Hot Drinks", price:5.00, options:["Hafer","Laktosefrei"] },
+  { id:"43", name:"Kleiner Milchkaffee",           category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"57", name:"Dopp. Latte Macchiato",         category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"—",  name:"Kleiner Latte Macchiato",       category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei","Koffeinfrei"] },
+  { id:"50", name:"Latte Macchiato",               category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"19", name:"Latte Mac + Vanille",           category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"10", name:"Latte Mac + Karamel",           category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"28", name:"Latte Mac Koffeinfrei",         category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"15", name:"Getreidemilchkaffee",           category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"47", name:"Kleiner Getreidemilchkaffee",   category:"Hot Drinks", price:0,    options:["Hafer","Laktosefrei"] },
+  { id:"16", name:"Tasse Kaffee",                  category:"Hot Drinks", price:2.80, options:["Hafer","Milch","Laktosefrei"] },
+  { id:"20", name:"Tasse Kaffee Koffeinfrei",      category:"Hot Drinks", price:2.80, options:["Hafer","Milch","Laktosefrei"] },
+  { id:"18", name:"Schale Kaffee",                 category:"Hot Drinks", price:0,    options:["Hafer","Milch","Laktosefrei"] },
+  { id:"21", name:"Schale Kaffee Koffeinfrei",     category:"Hot Drinks", price:0,    options:["Hafer","Milch","Laktosefrei"] },
+  { id:"14", name:"Americano Kaffee",              category:"Hot Drinks", price:0,    options:["Hafer","Milch","Laktosefrei","Koffeinfrei"] },
 ];
 
 /* ════════════════════════════════════════════════════════════════
@@ -1180,7 +1107,7 @@ function renderTableView() {
         <div class="oi-num">#${item.menuItemId}</div>
         <div class="oi-body">
           <div class="oi-name">${escHtml(item.name)}</div>
-          ${item.side ? `<div class="oi-side">+ ${escHtml(item.side)}</div>` : ''}
+          ${item.options && item.options.length ? `<div class="oi-options">${item.options.map(escHtml).join(' · ')}</div>` : ''}
           ${item.comment ? `<div class="oi-comment">${escHtml(item.comment)}</div>` : ''}
         </div>
         <div class="oi-right">
@@ -1330,12 +1257,12 @@ document.getElementById('search-input').addEventListener('input', (e) => {
 ════════════════════════════════════════════════════════════════ */
 let pendingMenuItem = null;
 let pendingQty = 1;
-let pendingSide = null;
+let pendingOptions = [];
 
 function openItemModal(menuItem) {
   pendingMenuItem = menuItem;
   pendingQty = 1;
-  pendingSide = null;
+  pendingOptions = [];
   document.getElementById('modal-item-action-label').textContent = 'Add to Order';
   document.getElementById('modal-item-info').innerHTML = `
     <div class="mii-name">${escHtml(menuItem.name)}</div>
@@ -1345,25 +1272,33 @@ function openItemModal(menuItem) {
   document.getElementById('item-comment').value = '';
   document.getElementById('btn-confirm-item').textContent = 'Add to order';
 
-  // Side picker — only for Pizza category
-  const isPizza = menuItem.category === 'Pizza';
-  const sideSection = document.getElementById('side-picker-section');
-  sideSection.style.display = isPizza ? 'block' : 'none';
-  document.querySelectorAll('.side-opt').forEach(b => b.classList.remove('selected'));
-  document.getElementById('side-required-hint').classList.remove('visible');
+  // Options picker — render pills for any item that has options
+  const opts = menuItem.options && menuItem.options.length ? menuItem.options : [];
+  const section = document.getElementById('options-picker-section');
+  const pillsEl = document.getElementById('options-pills');
+  if (opts.length) {
+    pillsEl.innerHTML = opts.map(o =>
+      `<button class="opt-pill" data-opt="${escHtml(o)}">${escHtml(o)}</button>`
+    ).join('');
+    pillsEl.querySelectorAll('.opt-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const opt = btn.dataset.opt;
+        if (btn.classList.contains('selected')) {
+          if (!pendingOptions.includes(opt)) pendingOptions.push(opt);
+        } else {
+          pendingOptions = pendingOptions.filter(o => o !== opt);
+        }
+      });
+    });
+    section.style.display = 'block';
+  } else {
+    section.style.display = 'none';
+    pillsEl.innerHTML = '';
+  }
 
   document.getElementById('modal-item').classList.add('open');
 }
-
-// Side option buttons — add modal only
-document.querySelectorAll('#side-picker-section .side-opt').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('#side-picker-section .side-opt').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    pendingSide = btn.dataset.side;
-    document.getElementById('side-required-hint').classList.remove('visible');
-  });
-});
 
 function closeItemModal() {
   document.getElementById('modal-item').classList.remove('open');
@@ -1380,12 +1315,6 @@ document.getElementById('qty-plus').addEventListener('click', () => {
 document.getElementById('btn-confirm-item').addEventListener('click', () => {
   if (!pendingMenuItem) return;
 
-  // Require a side selection for Pizza
-  if (pendingMenuItem.category === 'Pizza' && !pendingSide) {
-    document.getElementById('side-required-hint').classList.add('visible');
-    return;
-  }
-
   const session = getOrCreateSession(currentTableId);
   currentSessionId = session.id;
 
@@ -1398,7 +1327,7 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
     name:       pendingMenuItem.name,
     price:      pendingMenuItem.price,
     qty:        pendingQty,
-    side:       pendingSide || null,
+    options:    pendingOptions.length ? [...pendingOptions] : [],
     comment:    document.getElementById('item-comment').value.trim(),
     addedAt:    Date.now(),
   };
@@ -1414,7 +1343,7 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
 ════════════════════════════════════════════════════════════════ */
 let editingItemId = null;
 let editQty = 1;
-let editSide = null;
+let editOptions = [];
 
 function openEditModal(itemId) {
   const session = getActiveSession(currentTableId);
@@ -1423,7 +1352,7 @@ function openEditModal(itemId) {
   if (!item) return;
   editingItemId = itemId;
   editQty = item.qty;
-  editSide = item.side || null;
+  editOptions = item.options ? [...item.options] : [];
 
   document.getElementById('edit-item-info').innerHTML = `
     <div class="mii-name">${escHtml(item.name)}</div>
@@ -1432,28 +1361,34 @@ function openEditModal(itemId) {
   document.getElementById('edit-qty-display').textContent = editQty;
   document.getElementById('edit-comment').value = item.comment || '';
 
-  // Show side picker only for pizza items
+  // Options picker
   const menuItem = menu.find(m => m.id === item.menuItemId);
-  const isPizza = menuItem && menuItem.category === 'Pizza';
-  const sideSection = document.getElementById('edit-side-picker-section');
-  sideSection.style.display = isPizza ? 'block' : 'none';
-  if (isPizza) {
-    document.querySelectorAll('.edit-side-opt').forEach(b => {
-      b.classList.toggle('selected', b.dataset.side === editSide);
+  const opts = menuItem && menuItem.options && menuItem.options.length ? menuItem.options : [];
+  const section = document.getElementById('edit-options-picker-section');
+  const pillsEl = document.getElementById('edit-options-pills');
+  if (opts.length) {
+    pillsEl.innerHTML = opts.map(o =>
+      `<button class="opt-pill${editOptions.includes(o) ? ' selected' : ''}" data-opt="${escHtml(o)}">${escHtml(o)}</button>`
+    ).join('');
+    pillsEl.querySelectorAll('.opt-pill').forEach(btn => {
+      btn.addEventListener('click', () => {
+        btn.classList.toggle('selected');
+        const opt = btn.dataset.opt;
+        if (btn.classList.contains('selected')) {
+          if (!editOptions.includes(opt)) editOptions.push(opt);
+        } else {
+          editOptions = editOptions.filter(o => o !== opt);
+        }
+      });
     });
+    section.style.display = 'block';
+  } else {
+    section.style.display = 'none';
+    pillsEl.innerHTML = '';
   }
 
   document.getElementById('modal-edit-item').classList.add('open');
 }
-
-// Edit-modal side option buttons
-document.querySelectorAll('.edit-side-opt').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.edit-side-opt').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    editSide = btn.dataset.side;
-  });
-});
 
 function closeEditModal() {
   document.getElementById('modal-edit-item').classList.remove('open');
@@ -1473,7 +1408,7 @@ document.getElementById('btn-save-edit').addEventListener('click', () => {
   const item = session.items.find(i => i.id === editingItemId);
   if (!item) return;
   item.qty     = editQty;
-  item.side    = editSide;
+  item.options = [...editOptions];
   item.comment = document.getElementById('edit-comment').value.trim();
   saveData();
   closeEditModal();
@@ -1544,7 +1479,7 @@ function renderBillContent(session) {
         <div class="bl-price">${fmtPrice(lineAmt)}</div>
         <div class="bl-check">${checkContent}</div>
       </div>
-      ${item.side    ? `<div class="bl-side">+ ${escHtml(item.side)}</div>`    : ''}
+      ${item.options && item.options.length ? `<div class="bl-side">${item.options.map(escHtml).join(' · ')}</div>` : ''}
       ${item.comment ? `<div class="bl-comment">${escHtml(item.comment)}</div>` : ''}
     `;
   }
