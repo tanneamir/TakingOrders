@@ -875,6 +875,37 @@
     }
     .mme-add-opt-btn:active { background: var(--border); }
 
+    /* Category picker */
+    .mme-cat-pills {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .mme-cat-pill {
+      height: 34px; padding: 0 13px;
+      border-radius: 100px;
+      background: var(--bg3);
+      border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 500; color: var(--text2);
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background .12s, border-color .12s, color .12s;
+    }
+    .mme-cat-pill:active { opacity: .75; }
+    .mme-cat-pill.selected {
+      background: rgba(245,158,11,.12);
+      border-color: var(--accent);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .mme-cat-pill.add-new {
+      border-style: dashed;
+      color: var(--text3);
+    }
+    .mme-cat-pill.add-new.active {
+      background: rgba(245,158,11,.08);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .mme-actions { display: flex; gap: 10px; margin-top: 18px; }
     .mme-btn {
       flex: 1; height: 50px; border-radius: 12px;
@@ -1122,8 +1153,9 @@
       </div>
       <div class="mme-field" style="flex:2">
         <div class="mme-label">Category</div>
-        <input class="mme-input" id="mme-category" type="text" placeholder="Category" list="mme-category-list" />
-        <datalist id="mme-category-list"></datalist>
+        <div id="mme-cat-picker"></div>
+        <input class="mme-input" id="mme-category-new" type="text" placeholder="New category name…" style="display:none;margin-top:8px" />
+        <input type="hidden" id="mme-category" />
       </div>
     </div>
     <div class="mme-field">
@@ -2727,12 +2759,9 @@ function openMenuItemModal(itemId) {
   document.getElementById('mme-name').value     = item ? item.name     : '';
   document.getElementById('mme-id').value       = item ? item.id       : '';
   document.getElementById('mme-price').value    = item ? item.price    : '';
-  document.getElementById('mme-category').value = item ? item.category : '';
-
-  // Populate category datalist
-  const dl = document.getElementById('mme-category-list');
+  // Populate category picker
   const cats = [...new Set(menu.map(i => i.category))];
-  dl.innerHTML = cats.map(c => `<option value="${escHtml(c)}">`).join('');
+  renderMmeCatPicker(cats, item ? item.category : '');
 
   // Options
   renderMmeOptions(item ? (item.options || []) : []);
@@ -2776,6 +2805,63 @@ document.getElementById('mme-add-option-btn').addEventListener('click', () => {
   if (inputs.length) inputs[inputs.length - 1].focus();
 });
 
+function renderMmeCatPicker(cats, selected) {
+  const picker  = document.getElementById('mme-cat-picker');
+  const newInput = document.getElementById('mme-category-new');
+  const hidden  = document.getElementById('mme-category');
+
+  // Determine if "new category" mode is active (selected value not in existing cats)
+  const isNewMode = selected && !cats.includes(selected);
+
+  hidden.value   = selected || '';
+  newInput.value = isNewMode ? selected : '';
+  newInput.style.display = isNewMode ? '' : 'none';
+
+  picker.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'mme-cat-pills';
+
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mme-cat-pill' + (cat === selected ? ' selected' : '');
+    btn.textContent = cat;
+    btn.addEventListener('click', () => {
+      hidden.value = cat;
+      newInput.style.display = 'none';
+      newInput.value = '';
+      // Re-render to update selection highlight
+      renderMmeCatPicker(cats, cat);
+    });
+    wrap.appendChild(btn);
+  });
+
+  // "+ New category" pill
+  const addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'mme-cat-pill add-new' + (isNewMode ? ' active' : '');
+  addBtn.textContent = '+ New';
+  addBtn.addEventListener('click', () => {
+    // Deselect existing, show input
+    hidden.value = '';
+    newInput.style.display = '';
+    newInput.value = isNewMode ? newInput.value : '';
+    renderMmeCatPicker(cats, ''); // clear selection
+    // Re-show input (renderMmeCatPicker hides it when selected is empty)
+    const ni = document.getElementById('mme-category-new');
+    ni.style.display = '';
+    document.getElementById('mme-cat-picker').querySelector('.add-new').classList.add('active');
+    setTimeout(() => ni.focus(), 50);
+  });
+  wrap.appendChild(addBtn);
+  picker.appendChild(wrap);
+
+  // Keep hidden field in sync as user types new category
+  newInput.oninput = () => {
+    hidden.value = newInput.value.trim();
+  };
+}
+
 function closeMenuItemModal() {
   document.getElementById('modal-menu-item').classList.remove('open');
   editingMenuItemId = null;
@@ -2790,7 +2876,12 @@ document.getElementById('mme-save-btn').addEventListener('click', () => {
 
   if (!name) { document.getElementById('mme-name').focus(); return; }
   if (!id)   { document.getElementById('mme-id').focus(); return; }
-  if (!category) { document.getElementById('mme-category').focus(); return; }
+  if (!category) {
+    const ni = document.getElementById('mme-category-new');
+    if (ni.style.display !== 'none') { ni.focus(); }
+    else { document.getElementById('mme-cat-picker').querySelector('.add-new').click(); }
+    return;
+  }
 
   if (editingMenuItemId) {
     // Edit existing
