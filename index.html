@@ -724,7 +724,138 @@
     }
     .settings-btn:active { background: var(--bg3); }
     .settings-btn.danger-btn { color: var(--red); border-color: rgba(239,68,68,.3); }
+    .settings-btn.nav-btn {
+      color: var(--text); display: flex; align-items: center;
+      justify-content: space-between; padding: 0 16px;
+    }
+    .settings-btn.nav-btn .nav-arrow { color: var(--text3); font-size: 18px; }
     #menu-import-input { display: none; }
+
+    /* ── Menu Editor View ────────────────────────────────────────── */
+    #view-menu-editor { padding-bottom: 80px; }
+    .me-search-row {
+      position: sticky; top: 0; z-index: 5;
+      background: var(--bg);
+      padding: 0 0 12px;
+      display: flex; gap: 8px;
+    }
+    .me-search-wrap {
+      flex: 1; position: relative; display: flex; align-items: center;
+    }
+    #me-search-input {
+      width: 100%; height: 44px;
+      background: var(--bg2);
+      border-radius: 10px;
+      padding: 0 36px 0 36px;
+      font-size: 15px; color: var(--text);
+      border: 1.5px solid var(--border);
+      transition: border-color .15s;
+    }
+    #me-search-input:focus { border-color: var(--accent); }
+    .me-search-icon { position: absolute; left: 11px; pointer-events: none; color: var(--text3); }
+    #me-search-clear {
+      position: absolute; right: 9px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--border); color: var(--text2);
+      font-size: 12px; font-weight: 700;
+      display: none; align-items: center; justify-content: center;
+    }
+    #me-search-clear.visible { display: flex; }
+    #me-add-item-btn {
+      height: 44px; width: 44px; flex-shrink: 0;
+      background: var(--accent); color: #111;
+      border-radius: 10px; font-size: 26px; font-weight: 300;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #me-add-item-btn:active { background: var(--accent-d); }
+
+    .me-cat-header {
+      font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
+      color: var(--text3); padding: 12px 0 6px;
+    }
+    .me-item {
+      background: var(--bg2);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px;
+      margin-bottom: 4px;
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
+      transition: background .1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .me-item:active { background: var(--bg3); }
+    .me-drag-handle {
+      color: var(--text3); font-size: 16px; flex-shrink: 0;
+      cursor: grab; padding: 0 2px;
+      touch-action: none;
+    }
+    .me-item-id {
+      font-size: 11px; font-weight: 700; color: var(--accent);
+      background: rgba(245,158,11,.1);
+      border-radius: 5px; padding: 2px 5px;
+      flex-shrink: 0; min-width: 36px; text-align: center;
+    }
+    .me-item-name { flex: 1; font-size: 14px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .me-item-price { font-size: 14px; font-weight: 700; flex-shrink: 0; color: var(--text2); }
+    .me-item-chevron { color: var(--text3); font-size: 14px; flex-shrink: 0; }
+
+    /* ── Menu Item Edit Modal ─────────────────────────────────────── */
+    #modal-menu-item { z-index: 90; }
+    #modal-menu-item .modal-box { padding-bottom: 36px; max-height: 92vh; overflow-y: auto; }
+    .mme-field { margin-bottom: 14px; }
+    .mme-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+    .mme-input {
+      width: 100%; height: 46px;
+      background: var(--bg3); color: var(--text);
+      border-radius: 10px; border: 1.5px solid var(--border);
+      padding: 0 14px; font-size: 15px;
+      transition: border-color .15s;
+    }
+    .mme-input:focus { border-color: var(--accent); }
+    .mme-input.small { width: 120px; }
+    .mme-row { display: flex; gap: 10px; }
+    .mme-row .mme-field { flex: 1; }
+
+    /* Options editor inside modal */
+    .mme-options-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .mme-option-row {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .mme-option-input {
+      flex: 1; height: 40px;
+      background: var(--bg3); color: var(--text);
+      border-radius: 8px; border: 1.5px solid var(--border);
+      padding: 0 12px; font-size: 14px;
+      transition: border-color .15s;
+    }
+    .mme-option-input:focus { border-color: var(--accent); }
+    .mme-opt-del {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(239,68,68,.12); color: var(--red);
+      border-radius: 8px; font-size: 17px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mme-opt-del:active { background: rgba(239,68,68,.25); }
+    .mme-add-opt-btn {
+      width: 100%; height: 38px;
+      background: var(--bg3); color: var(--text2);
+      border-radius: 8px; border: 1px dashed var(--border);
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .mme-add-opt-btn:active { background: var(--border); }
+
+    .mme-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .mme-btn {
+      flex: 1; height: 50px; border-radius: 12px;
+      font-size: 15px; font-weight: 700;
+    }
+    .mme-btn.cancel { background: var(--bg3); color: var(--text2); }
+    .mme-btn.cancel:active { background: var(--border); }
+    .mme-btn.save { background: var(--accent); color: #111; }
+    .mme-btn.save:active { background: var(--accent-d); }
+    .mme-btn.delete { background: rgba(239,68,68,.12); color: var(--red); max-width: 52px; flex: 0 0 52px; }
+    .mme-btn.delete:active { background: rgba(239,68,68,.25); }
 
     /* ── Misc ────────────────────────────────────────────────────── */
     .divider { height: 1px; background: var(--border); margin: 8px 0; }
@@ -806,6 +937,10 @@
 
       <div class="settings-section">
         <div class="settings-label">Menu</div>
+        <button class="settings-btn nav-btn" id="btn-open-menu-editor">
+          <span>Edit Menu Items</span>
+          <span class="nav-arrow">›</span>
+        </button>
         <button class="settings-btn" id="btn-import-menu">Import menu.json</button>
         <input type="file" id="menu-import-input" accept=".json" />
         <button class="settings-btn" id="btn-export-menu">Export current menu</button>
@@ -820,6 +955,22 @@
         <button class="settings-btn danger-btn" id="btn-clear-today">Clear today's closed sessions</button>
         <button class="settings-btn danger-btn" id="btn-clear-all">Clear all data</button>
       </div>
+    </section>
+
+    <!-- ── Menu Editor View ──────────────────────────────────── -->
+    <section id="view-menu-editor" class="view">
+      <div class="me-search-row">
+        <div class="me-search-wrap">
+          <svg class="me-search-icon" width="15" height="15" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M11 11l3 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <input id="me-search-input" type="text" placeholder="Search items…" autocomplete="off" />
+          <button id="me-search-clear">✕</button>
+        </div>
+        <button id="me-add-item-btn">+</button>
+      </div>
+      <div id="me-items-list"></div>
     </section>
 
   </div><!-- /main-content -->
@@ -914,6 +1065,51 @@
     <button class="bill-footer-btn secondary" id="bill-btn-add-more">+ Add items</button>
     <button class="bill-footer-btn danger"    id="bill-btn-new-guests">New guests</button>
     <button class="bill-footer-btn primary"   id="bill-btn-paid">Paid ✓</button>
+  </div>
+</div>
+
+<!-- ── Menu Item Edit Modal ───────────────────────────────────── -->
+<div id="modal-menu-item" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span id="mme-title">Edit Item</span>
+      <button class="modal-close-btn" onclick="closeMenuItemModal()">✕</button>
+    </div>
+    <div class="mme-row">
+      <div class="mme-field" style="flex:2">
+        <div class="mme-label">Name</div>
+        <input class="mme-input" id="mme-name" type="text" placeholder="Item name" />
+      </div>
+      <div class="mme-field" style="flex:0 0 90px">
+        <div class="mme-label">Article #</div>
+        <input class="mme-input" id="mme-id" type="text" placeholder="id" />
+      </div>
+    </div>
+    <div class="mme-row">
+      <div class="mme-field">
+        <div class="mme-label">Price</div>
+        <input class="mme-input" id="mme-price" type="number" step="0.01" min="0" placeholder="0.00" />
+      </div>
+      <div class="mme-field" style="flex:2">
+        <div class="mme-label">Category</div>
+        <input class="mme-input" id="mme-category" type="text" placeholder="Category" list="mme-category-list" />
+        <datalist id="mme-category-list"></datalist>
+      </div>
+    </div>
+    <div class="mme-field">
+      <div class="mme-label">Additional Options</div>
+      <div class="mme-options-list" id="mme-options-list"></div>
+      <button class="mme-add-opt-btn" id="mme-add-option-btn">+ Add option</button>
+    </div>
+    <div class="mme-actions">
+      <button class="mme-btn delete" id="mme-delete-btn" title="Delete item">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M3 4h10M6 4V3h4v1M5 4l.5 8.5h5L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="mme-btn cancel" onclick="closeMenuItemModal()">Cancel</button>
+      <button class="mme-btn save" id="mme-save-btn">Save</button>
+    </div>
   </div>
 </div>
 
@@ -1520,6 +1716,7 @@ function renderHeaderActions(view) {
 document.getElementById('btn-back').addEventListener('click', () => {
   if (document.getElementById('sheet-add').classList.contains('open')) { closeSheet(); return; }
   if (currentView === 'table') navigate('tables');
+  else if (currentView === 'menu-editor') navigate('settings');
   else navigate('tables');
 });
 
@@ -2259,6 +2456,291 @@ document.getElementById('confirm-cancel').addEventListener('click', () => {
 document.getElementById('confirm-ok').addEventListener('click', () => {
   document.getElementById('confirm-modal').classList.remove('open');
   if (confirmCallback) { confirmCallback(); confirmCallback = null; }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   MENU EDITOR
+════════════════════════════════════════════════════════════════ */
+let meSearchQuery = '';
+
+document.getElementById('btn-open-menu-editor').addEventListener('click', () => {
+  openMenuEditor();
+});
+
+function openMenuEditor() {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-menu-editor').classList.add('active');
+  currentView = 'menu-editor';
+
+  const backBtn = document.getElementById('btn-back');
+  backBtn.classList.remove('hidden');
+
+  document.getElementById('header-title').textContent = 'Menu';
+  document.getElementById('header-actions').innerHTML = '';
+  document.getElementById('fab-add').classList.add('hidden');
+  document.getElementById('main-content').scrollTop = 0;
+
+  meSearchQuery = '';
+  document.getElementById('me-search-input').value = '';
+  document.getElementById('me-search-clear').classList.remove('visible');
+  renderMenuEditor();
+}
+
+function renderMenuEditor() {
+  const q = meSearchQuery.trim().toLowerCase();
+  const container = document.getElementById('me-items-list');
+  container.innerHTML = '';
+
+  let items = menu;
+  if (q) {
+    items = items.filter(i =>
+      i.name.toLowerCase().includes(q) ||
+      String(i.id).toLowerCase().includes(q) ||
+      i.category.toLowerCase().includes(q)
+    );
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text3);font-size:14px">No items found</div>';
+    return;
+  }
+
+  // Group by category (preserving first-seen order from menu array)
+  const catOrder = [];
+  const byCategory = {};
+  items.forEach(item => {
+    if (!byCategory[item.category]) {
+      byCategory[item.category] = [];
+      catOrder.push(item.category);
+    }
+    byCategory[item.category].push(item);
+  });
+
+  catOrder.forEach(cat => {
+    const header = document.createElement('div');
+    header.className = 'me-cat-header';
+    header.textContent = cat;
+    container.appendChild(header);
+
+    byCategory[cat].forEach((item, catIdx) => {
+      const el = document.createElement('div');
+      el.className = 'me-item';
+      el.dataset.id = item.id;
+      el.innerHTML = `
+        <span class="me-drag-handle" title="Drag to reorder">⠿</span>
+        <span class="me-item-id">#${escHtml(item.id)}</span>
+        <span class="me-item-name">${escHtml(item.name)}</span>
+        <span class="me-item-price">${fmtPrice(item.price)}</span>
+        <span class="me-item-chevron">›</span>
+      `;
+      el.addEventListener('click', () => openMenuItemModal(item.id));
+      makeDraggable(el, item.id);
+      container.appendChild(el);
+    });
+  });
+}
+
+// Search
+document.getElementById('me-search-input').addEventListener('input', (e) => {
+  meSearchQuery = e.target.value;
+  document.getElementById('me-search-clear').classList.toggle('visible', meSearchQuery.length > 0);
+  renderMenuEditor();
+});
+document.getElementById('me-search-clear').addEventListener('click', () => {
+  meSearchQuery = '';
+  document.getElementById('me-search-input').value = '';
+  document.getElementById('me-search-clear').classList.remove('visible');
+  renderMenuEditor();
+});
+
+// Add new item
+document.getElementById('me-add-item-btn').addEventListener('click', () => {
+  openMenuItemModal(null);
+});
+
+/* ── Drag to reorder ──────────────────────────────────────────── */
+let dragSrcId = null;
+
+function makeDraggable(el, itemId) {
+  const handle = el.querySelector('.me-drag-handle');
+  // Touch drag
+  handle.addEventListener('touchstart', (e) => {
+    dragSrcId = itemId;
+    el.style.opacity = '0.5';
+    e.preventDefault();
+  }, { passive: false });
+  handle.addEventListener('touchend', () => {
+    el.style.opacity = '';
+    dragSrcId = null;
+  });
+  el.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+    const targetEl = target && target.closest('.me-item');
+    if (targetEl && targetEl !== el) {
+      const targetId = targetEl.dataset.id;
+      swapMenuItems(dragSrcId, targetId);
+      dragSrcId = targetId;
+      renderMenuEditor();
+    }
+  }, { passive: false });
+
+  // Mouse drag
+  el.setAttribute('draggable', 'true');
+  el.addEventListener('dragstart', (e) => {
+    dragSrcId = itemId;
+    e.dataTransfer.effectAllowed = 'move';
+    setTimeout(() => { el.style.opacity = '0.4'; }, 0);
+  });
+  el.addEventListener('dragend', () => {
+    el.style.opacity = '';
+    dragSrcId = null;
+  });
+  el.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  });
+  el.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (dragSrcId && dragSrcId !== itemId) {
+      swapMenuItems(dragSrcId, itemId);
+      dragSrcId = itemId;
+      renderMenuEditor();
+    }
+  });
+}
+
+function swapMenuItems(srcId, dstId) {
+  const si = menu.findIndex(i => i.id === srcId);
+  const di = menu.findIndex(i => i.id === dstId);
+  if (si === -1 || di === -1) return;
+  const tmp = menu[si];
+  menu.splice(si, 1);
+  const newDi = menu.findIndex(i => i.id === dstId);
+  menu.splice(newDi < di ? newDi + 1 : newDi, 0, tmp);
+  saveMenu();
+}
+
+/* ── Menu Item Edit Modal ─────────────────────────────────────── */
+let editingMenuItemId = null; // null = new item
+
+function openMenuItemModal(itemId) {
+  editingMenuItemId = itemId;
+  const item = itemId ? menu.find(i => i.id === itemId) : null;
+
+  document.getElementById('mme-title').textContent = item ? 'Edit Item' : 'New Item';
+  document.getElementById('mme-name').value     = item ? item.name     : '';
+  document.getElementById('mme-id').value       = item ? item.id       : '';
+  document.getElementById('mme-price').value    = item ? item.price    : '';
+  document.getElementById('mme-category').value = item ? item.category : '';
+
+  // Populate category datalist
+  const dl = document.getElementById('mme-category-list');
+  const cats = [...new Set(menu.map(i => i.category))];
+  dl.innerHTML = cats.map(c => `<option value="${escHtml(c)}">`).join('');
+
+  // Options
+  renderMmeOptions(item ? (item.options || []) : []);
+
+  // Show/hide delete button for new items
+  document.getElementById('mme-delete-btn').style.display = item ? 'flex' : 'none';
+
+  document.getElementById('modal-menu-item').classList.add('open');
+  setTimeout(() => document.getElementById('mme-name').focus(), 100);
+}
+
+function renderMmeOptions(opts) {
+  const list = document.getElementById('mme-options-list');
+  list.innerHTML = '';
+  opts.forEach((opt, idx) => {
+    const row = document.createElement('div');
+    row.className = 'mme-option-row';
+    row.innerHTML = `
+      <input class="mme-option-input" type="text" value="${escHtml(opt)}" placeholder="Option label" data-idx="${idx}" />
+      <button class="mme-opt-del" data-idx="${idx}" title="Remove">−</button>
+    `;
+    row.querySelector('.mme-opt-del').addEventListener('click', () => {
+      const current = getMmeCurrentOptions();
+      current.splice(idx, 1);
+      renderMmeOptions(current);
+    });
+    list.appendChild(row);
+  });
+}
+
+function getMmeCurrentOptions() {
+  return [...document.querySelectorAll('.mme-option-input')].map(el => el.value.trim()).filter(v => v);
+}
+
+document.getElementById('mme-add-option-btn').addEventListener('click', () => {
+  const current = getMmeCurrentOptions();
+  current.push('');
+  renderMmeOptions(current);
+  // Focus the new input
+  const inputs = document.querySelectorAll('.mme-option-input');
+  if (inputs.length) inputs[inputs.length - 1].focus();
+});
+
+function closeMenuItemModal() {
+  document.getElementById('modal-menu-item').classList.remove('open');
+  editingMenuItemId = null;
+}
+
+document.getElementById('mme-save-btn').addEventListener('click', () => {
+  const name     = document.getElementById('mme-name').value.trim();
+  const id       = document.getElementById('mme-id').value.trim();
+  const price    = parseFloat(document.getElementById('mme-price').value) || 0;
+  const category = document.getElementById('mme-category').value.trim();
+  const options  = getMmeCurrentOptions();
+
+  if (!name) { document.getElementById('mme-name').focus(); return; }
+  if (!id)   { document.getElementById('mme-id').focus(); return; }
+  if (!category) { document.getElementById('mme-category').focus(); return; }
+
+  if (editingMenuItemId) {
+    // Edit existing
+    const item = menu.find(i => i.id === editingMenuItemId);
+    if (item) {
+      // If id changed, check for duplicate
+      if (id !== editingMenuItemId && menu.some(i => i.id === id)) {
+        alert('An item with article number "' + id + '" already exists.');
+        return;
+      }
+      item.name     = name;
+      item.id       = id;
+      item.price    = price;
+      item.category = category;
+      item.options  = options;
+    }
+  } else {
+    // New item
+    if (menu.some(i => i.id === id)) {
+      alert('An item with article number "' + id + '" already exists.');
+      return;
+    }
+    menu.push({ id, name, category, price, options });
+  }
+
+  saveMenu();
+  closeMenuItemModal();
+  renderMenuEditor();
+});
+
+document.getElementById('mme-delete-btn').addEventListener('click', () => {
+  if (!editingMenuItemId) return;
+  const item = menu.find(i => i.id === editingMenuItemId);
+  const name = item ? item.name : editingMenuItemId;
+  closeMenuItemModal();
+  showConfirm(
+    'Delete item?',
+    '"' + name + '" will be permanently removed from the menu.',
+    () => {
+      menu = menu.filter(i => i.id !== editingMenuItemId);
+      saveMenu();
+      renderMenuEditor();
+    }
+  );
 });
 
 /* ════════════════════════════════════════════════════════════════
