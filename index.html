@@ -125,22 +125,19 @@
     .table-card.status-free   .tc-label { color: var(--text3); }
     .table-card.status-active .tc-label { color: var(--green); }
     .table-card.status-billed .tc-label { color: var(--amber); }
+    .table-card .tc-row {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-card .tc-right {
+      text-align: right;
+    }
     .table-card .tc-info {
-      margin-top: 10px;
-      font-size: 13px; color: var(--text2);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-size: 12px; color: var(--text2);
+      margin-top: 3px;
     }
     .table-card .tc-total {
-      margin-top: 4px;
       font-size: 17px; font-weight: 700; color: var(--text);
     }
-    .table-card .tc-badge {
-      position: absolute; top: 10px; right: 10px;
-      width: 10px; height: 10px; border-radius: 50%;
-    }
-    .status-free   .tc-badge { background: var(--text3); }
-    .status-active .tc-badge { background: var(--green); box-shadow: 0 0 0 3px rgba(34,197,94,.2); }
-    .status-billed .tc-badge { background: var(--amber); box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
 
     /* ── Table / Order View ──────────────────────────────────────── */
     .session-banner {
@@ -219,13 +216,7 @@
     .empty-order-cta .cta-label {
       font-size: 16px; font-weight: 700; color: #111;
     }
-    #fab-add.fab-empty {
-      width: 72px; height: 72px;
-      border-radius: 36px;
-      font-size: 36px;
-      bottom: 110px; right: 20px;
-      box-shadow: 0 6px 28px rgba(245,158,11,.55);
-    }
+
 
     /* Order total bar */
     .order-total-bar {
@@ -253,7 +244,8 @@
 
     /* Add item FAB */
     #fab-add {
-      position: fixed; bottom: 100px; right: 20px;
+      position: fixed; bottom: 50%; right: 50%;
+      transform: translate(50%, 50%);
       width: 56px; height: 56px;
       border-radius: 28px;
       background: var(--accent);
@@ -264,7 +256,7 @@
       z-index: 40;
       transition: transform .15s;
     }
-    #fab-add:active { transform: scale(.93); }
+    #fab-add:active { transform: translate(50%, 50%) scale(.93); }
     #fab-add.hidden { display: none; }
 
     /* ── History View ────────────────────────────────────────────── */
@@ -332,6 +324,24 @@
       margin: 10px auto 14px;
       flex-shrink: 0;
     }
+    .sheet-cat-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 16px 12px;
+      flex-shrink: 0;
+    }
+    .sheet-cat-header.hidden { display: none; }
+    .sheet-cat-header #btn-cat-back {
+      width: 36px; height: 36px;
+      background: var(--bg3);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text2);
+      flex-shrink: 0;
+    }
+    .sheet-cat-header #btn-cat-back:active { background: var(--border); }
+    #sheet-cat-title {
+      font-size: 17px; font-weight: 700; color: var(--text);
+    }
     .sheet-search-row {
       display: flex; gap: 8px; padding: 0 16px 12px;
       flex-shrink: 0;
@@ -368,21 +378,24 @@
     #search-clear.visible { display: flex; }
     #search-clear:active { background: var(--text3); }
     .sheet-cats {
-      display: flex; flex-wrap: wrap; gap: 8px;
-      padding: 0 16px 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 8px 16px 14px;
       flex-shrink: 0;
-      max-height: 140px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
     }
+    .sheet-cats.cats-fullscreen {
+      flex: 1;
+      align-content: start;
+    }
+    .sheet-cats.hidden { display: none; }
     .cat-pill {
-      flex-shrink: 0;
-      height: 36px; padding: 0 16px;
-      border-radius: 100px;
+      height: 44px;
+      border-radius: 12px;
       background: var(--bg3);
       border: 1px solid var(--border);
       font-size: 13px; font-weight: 600; color: var(--text2);
-      white-space: nowrap;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       transition: background .15s, color .15s, border-color .15s;
     }
     .cat-pill.active { background: var(--accent); border-color: var(--accent); color: #111; }
@@ -530,11 +543,8 @@
       color: var(--text3);
     }
     .bill-line.settled {
-      opacity: .45;
+      opacity: .35;
     }
-    .bill-line.settled .bl-name,
-    .bill-line.settled .bl-qty,
-    .bill-line.settled .bl-price { text-decoration: line-through; }
     .bill-line.settled .bl-check {
       background: var(--bg3); border-color: var(--border);
       font-size: 14px; color: var(--text3);
@@ -952,10 +962,6 @@
       <div id="order-items-list" class="order-items-list"></div>
       <div id="empty-order" class="empty-order" style="display:none">
         <p>No items yet.</p>
-        <div class="empty-order-cta" id="empty-order-cta">
-          <div class="cta-plus">+</div>
-          <div class="cta-label">Add items</div>
-        </div>
       </div>
       <div class="order-total-bar" id="order-total-bar">
         <div class="otb-total">
@@ -1041,6 +1047,14 @@
   <div id="sheet-backdrop" id="sheet-backdrop"></div>
   <div id="sheet-panel">
     <div class="sheet-handle"></div>
+    <div id="sheet-cat-header" class="sheet-cat-header hidden">
+      <button id="btn-cat-back">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M11 14L6 9l5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <span id="sheet-cat-title"></span>
+    </div>
     <div class="sheet-search-row">
       <div class="sheet-search-wrap">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1209,444 +1223,476 @@
    DEFAULT MENU
 ════════════════════════════════════════════════════════════════ */
 const DEFAULT_MENU = [
-  { id:"1", name:"Espresso", category:"warme Getränke", price:2.20, options:["Macchiato", "Milch", "Koffeinfrei"] },
-  { id:"2", name:"Espresso + Sahne", category:"warme Getränke", price:2.80, options:["Koffeinfrei"] },
-  { id:"3", name:"Dopp. Espresso", category:"warme Getränke", price:3.20, options:["Macchiato", "Milch", "Koffeinfrei"] },
-  { id:"4", name:"Dopp. Espresso + Sahne", category:"warme Getränke", price:3.80, options:["Koffeinfrei"] },
-  { id:"5", name:"Verläng. Espress", category:"warme Getränke", price:2.80, options:["Macchiato", "Milch", "Koffeinfrei"] },
-  { id:"6", name:"Verläng. Espresso + Sahne", category:"warme Getränke", price:3.40, options:["Koffeinfrei"] },
-  { id:"8", name:"Cappuccino", category:"warme Getränke", price:3.80, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"9", name:"Dopp. Cappu", category:"warme Getränke", price:4.80, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"48", name:"Cappuccino Koffeinfrei", category:"warme Getränke", price:4.80, options:["Hafer", "Laktosefrei"] },
-  { id:"12", name:"Flat White", category:"warme Getränke", price:4.50, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"11", name:"Schale Milchkaffe", category:"warme Getränke", price:5.00, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"49", name:"Milchkaffee Koffeinfrei", category:"warme Getränke", price:5.00, options:["Hafer", "Laktosefrei"] },
-  { id:"13", name:"Kleiner Milchkaffee", category:"warme Getränke", price:4.00, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"50", name:"Latte Macchiato", category:"warme Getränke", price:5.00, options:["Hafer", "Laktosefrei"] },
-  { id:"28", name:"Latte Mac Koffeinfrei", category:"warme Getränke", price:5.00, options:["Hafer", "Laktosefrei"] },
-  { id:"57", name:"Dopp. Latte Macchiato", category:"warme Getränke", price:6.00, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"43", name:"Kleiner Latte Macchiato", category:"warme Getränke", price:4.00, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
-  { id:"19", name:"Latte Mac + Vanille", category:"warme Getränke", price:5.30, options:["Hafer", "Laktosefrei"] },
-  { id:"10", name:"Latte Mac + Karamel", category:"warme Getränke", price:5.30, options:["Hafer", "Laktosefrei"] },
-  { id:"15", name:"Getreidemilchkaffee", category:"warme Getränke", price:5.00, options:["Hafer", "Laktosefrei"] },
-  { id:"47", name:"Kleiner Getreidemilchkaffee", category:"warme Getränke", price:2.80, options:["Hafer", "Laktosefrei"] },
-  { id:"16", name:"Tasse Kaffee Crema", category:"warme Getränke", price:2.80, options:["Hafer", "Milch", "Laktosefrei"] },
-  { id:"20", name:"Tasse Kaffee Koffeinfrei", category:"warme Getränke", price:2.80, options:["Hafer", "Milch", "Laktosefrei"] },
-  { id:"18", name:"Schale Kaffee", category:"warme Getränke", price:4.90, options:["Hafer", "Milch", "Laktosefrei"] },
-  { id:"21", name:"Schale Kaffee Koffeinfrei", category:"warme Getränke", price:4.90, options:["Hafer", "Milch", "Laktosefrei"] },
-  { id:"14", name:"Americano Kaffee", category:"warme Getränke", price:0.00, options:["Hafer", "Milch", "Laktosefrei", "Koffeinfrei"] },
-  { id:"40", name:"Heisse Schoko", category:"warme Getränke", price:4.20, options:["Hafer"] },
-  { id:"39", name:"Heisse Schoko + Sahne", category:"warme Getränke", price:4.80, options:[] },
-  { id:"2040", name:"Grosse Heisse Schoko", category:"warme Getränke", price:5.20, options:["Hafer"] },
-  { id:"2039", name:"Grosse Heisse Schoko + Sahne", category:"warme Getränke", price:5.80, options:[] },
-  { id:"41", name:"Glas kalte Milch", category:"warme Getränke", price:3.00, options:["Hafer", "Laktosefrei"] },
-  { id:"42", name:"Heisse Milch", category:"warme Getränke", price:3.50, options:["Hafer", "Laktosefrei"] },
-  { id:"44", name:"Heisse Milch + Honig", category:"warme Getränke", price:4.50, options:["Hafer", "Laktosefrei"] },
-  { id:"52", name:"Grog 2cl", category:"warme Getränke", price:5.00, options:[] },
-  { id:"53", name:"Grog 4cl", category:"warme Getränke", price:7.50, options:[] },
-  { id:"65", name:"Irish Coffee", category:"warme Getränke", price:8.00, options:[] },
-  { id:"66", name:"New Romantik", category:"warme Getränke", price:5.50, options:[] },
-  { id:"67", name:"Reine Nervensache", category:"warme Getränke", price:5.50, options:[] },
-  { id:"450", name:"Glühwein", category:"warme Getränke", price:5.50, options:[] },
-  { id:"79", name:"mit Schuss 2cl", category:"warme Getränke", price:3.50, options:[] },
-  { id:"60", name:"Frischer Ingwer Tee + Minze", category:"Tee", price:5.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"61", name:"Frischer Ingwer Tee + Zitrone", category:"Tee", price:5.20, options:["Honig", "Milch"] },
-  { id:"17", name:"Frischer Ingwer Tee + Honig", category:"Tee", price:4.80, options:["Honig", "Zitrone", "Milch"] },
-  { id:"7", name:"Frischer Minze Tee", category:"Tee", price:4.80, options:["Honig", "Zitrone", "Milch"] },
-  { id:"22", name:"Tasse Schwarzer Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"23", name:"Tasse Pfefferminz Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"24", name:"Tasse Kamillen Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"25", name:"Tasse Ingwer Lemon Tee", category:"Tee", price:3.00, options:["Honig", "Milch"] },
-  { id:"26", name:"Tasse Kräuter Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"27", name:"Tasse Fenchel Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"56", name:"Tasse Sanddorn Orange", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"45", name:"Tasse Grüner Tee", category:"Tee", price:3.00, options:["Honig", "Zitrone", "Milch"] },
-  { id:"29", name:"Känn. Darjeeling", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"30", name:"Känn. Ostfriese Assam", category:"Tee", price:6.20, options:["Honig", "Zitrone"] },
-  { id:"31", name:"Känn. Jasmin", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"32", name:"Känn. White Monkey", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"34", name:"Känn. Blütentraum", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"59", name:"Känn. Quelle", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"35", name:"Känn. Earl Grey", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"36", name:"Känn. Nana Minze", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"37", name:"Känn. Japan Sencha Grün", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"38", name:"Känn. Roibush-Lemon", category:"Tee", price:6.20, options:["Honig", "Zitrone", "Milch"] },
-  { id:"46", name:"Heisse Zitrone", category:"Tee", price:4.80, options:[] },
-  { id:"350", name:"Wasser Medium 0,33", category:"Soft Drinks", price:3.00, options:[] },
-  { id:"353", name:"Wasser Medium 1L", category:"Soft Drinks", price:7.20, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"354", name:"Wasser Still 0,33", category:"Soft Drinks", price:3.00, options:[] },
-  { id:"355", name:"Wasser Still 1L", category:"Soft Drinks", price:7.20, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"700", name:"Leitungswasser", category:"Soft Drinks", price:0.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"352", name:"Lindy Lush (Sommer Limo)", category:"Soft Drinks", price:5.00, options:[] },
-  { id:"374", name:"Fassbrause", category:"Soft Drinks", price:3.50, options:[] },
-  { id:"379", name:"Kombucha", category:"Soft Drinks", price:4.50, options:[] },
-  { id:"461", name:"Zisch Matcha", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"462", name:"Zisch Mate", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"361", name:"Fitz Zitrone", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"356", name:"Fritz Orange", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"357", name:"Fritz Cola", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"359", name:"Fritz Cola Zuckerfrei", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"362", name:"Fritz Mischmasch", category:"Soft Drinks", price:4.00, options:[] },
-  { id:"369", name:"Bitter Lemon", category:"Soft Drinks", price:3.70, options:[] },
-  { id:"370", name:"Tonic Water", category:"Soft Drinks", price:3.70, options:[] },
-  { id:"371", name:"Ginger Ale", category:"Soft Drinks", price:3.70, options:[] },
-  { id:"372", name:"Soda Water", category:"Soft Drinks", price:3.70, options:[] },
-  { id:"443", name:"Malzbier", category:"Soft Drinks", price:3.50, options:[] },
-  { id:"365", name:"kleine Apfelschorle", category:"Säfte / Schorlen", price:3.50, options:[] },
-  { id:"366", name:"große Apfelschorle", category:"Säfte / Schorlen", price:4.70, options:[] },
-  { id:"368", name:"kleine Schorle Saft -> Zusatztext", category:"Säfte / Schorlen", price:3.50, options:[] },
-  { id:"367", name:"große Schorle Saft-> Zusatztext", category:"Säfte / Schorlen", price:4.70, options:[] },
-  { id:"380", name:"Orangensaft", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"394", name:"Kirsch", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"463", name:"Mango", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"382", name:"Cranberry", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"383", name:"Ananas", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"384", name:"Maracuja", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"385", name:"Banane", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"386", name:"Tomate", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"387", name:"KiBa", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"396", name:"Johannisbeere", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"389", name:"Apfel", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"390", name:"Birne", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"391", name:"Rhabarber", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"393", name:"Traube", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"381", name:"Möhre", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"388", name:"Grosser Kiba / Mix Aus 2", category:"Säfte / Schorlen", price:3.90, options:[] },
-  { id:"395", name:"Grosser Saft 0,4  -> Zusatztext", category:"Säfte / Schorlen", price:5.90, options:[] },
-  { id:"400", name:"Orange", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"401", name:"Grapefruit", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"402", name:"Apfel", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"403", name:"Möhre", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"404", name:"Apfel-Möhre", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"405", name:"Apfel-Sellerie", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"406", name:"Orange-Apfel", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"409", name:"Orange-Möhre", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"410", name:"Orange-Grapefruit", category:"Frische Säfte", price:4.80, options:[] },
-  { id:"407", name:"Gemüse Mix", category:"Frische Säfte", price:5.50, options:[] },
-  { id:"408", name:"Obst Mix", category:"Frische Säfte", price:5.50, options:[] },
-  { id:"2---", name:"großer frischer Saft 0,4l", category:"Frische Säfte", price:8.50, options:[] },
-  { id:"445", name:"Wein 0,1L", category:"Weine", price:4.00, options:[] },
-  { id:"449", name:"Merlot 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"470", name:"Merlot 0,5", category:"Weine", price:14.50, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
-  { id:"444", name:"Cabernet Sauvignon 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"473", name:"Cabernet Sauvignon 0,5", category:"Weine", price:14.50, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
-  { id:"454", name:"Rosé 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"474", name:"Rosé 0,5", category:"Weine", price:14.50, options:[] },
-  { id:"465", name:"Grauburgunder 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"466", name:"Grauburgunder 0,5", category:"Weine", price:14.50, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
-  { id:"375", name:"Fl. Grauburgunder", category:"Weine", price:26.80, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"451", name:"Riesling 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"472", name:"Riesling 0,5", category:"Weine", price:14.50, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
-  { id:"481", name:"Fl. Riesling Messm.", category:"Weine", price:26.80, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"453", name:"Veltliner 0,2", category:"Weine", price:6.50, options:[] },
-  { id:"471", name:"Veltliner 0,5", category:"Weine", price:14.50, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
-  { id:"455", name:"Weissweinschorle 0,2", category:"Weine", price:5.50, options:[] },
-  { id:"2459", name:"Weissweinschorle 0,5", category:"Weine", price:11.50, options:[] },
-  { id:"456", name:"Rotweinschorle 0,2", category:"Weine", price:5.50, options:[] },
-  { id:"2460", name:"Rotweinschorle 0,5", category:"Weine", price:11.50, options:[] },
-  { id:"480", name:"Fl. Le Caillou, Côtes du Rhône", category:"Weine", price:29.50, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"457", name:"Kir 0,2", category:"Weine", price:7.90, options:[] },
-  { id:"446", name:"Cidre", category:"Weine", price:5.30, options:[] },
-  { id:"491", name:"Sekt 0,1", category:"Sekt / Champagner", price:5.10, options:[] },
-  { id:"492", name:"Mimosa Sekt + O-Saft", category:"Sekt / Champagner", price:4.90, options:[] },
-  { id:"467", name:"Sekt + Eis 0,2", category:"Sekt / Champagner", price:7.50, options:[] },
-  { id:"452", name:"Prosecco + Eis 0,2", category:"Sekt / Champagner", price:7.50, options:[] },
-  { id:"493", name:"Prosecco 0,1", category:"Sekt / Champagner", price:5.10, options:[] },
-  { id:"526", name:"Aperol Spritz", category:"Sekt / Champagner", price:8.00, options:[] },
-  { id:"490", name:"Cynar Spritz", category:"Sekt / Champagner", price:8.00, options:[] },
-  { id:"527", name:"Campari Spritz", category:"Sekt / Champagner", price:8.00, options:[] },
-  { id:"507", name:"Hugo", category:"Sekt / Champagner", price:8.50, options:[] },
-  { id:"495", name:"Kir Royal", category:"Sekt / Champagner", price:6.50, options:[] },
-  { id:"494", name:"Fl. Piccolo Geldermann 0,2", category:"Sekt / Champagner", price:10.90, options:["2 Gläser"] },
-  { id:"496", name:"Fl. Prosecco 0,75", category:"Sekt / Champagner", price:27.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"497", name:"Fl. Sekt Riesling 0,75", category:"Sekt / Champagner", price:27.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"499", name:"Fl. Sekt Rotkäppchen 0,75", category:"Sekt / Champagner", price:25.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"501", name:"Fl. Champagner Legras 0,375L", category:"Sekt / Champagner", price:43.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"502", name:"Fl. Champagner Legras 0,75L", category:"Sekt / Champagner", price:87.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"500", name:"Fl. Champagner Moët Piccolo 0,2", category:"Sekt / Champagner", price:28.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"503", name:"Fl. Champagner Moët 0,375", category:"Sekt / Champagner", price:49.00, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
-  { id:"419", name:"Pilsner Urquell 0,3", category:"Bier", price:3.70, options:[] },
-  { id:"418", name:"Pilsner Urquell 0,5", category:"Bier", price:5.10, options:[] },
-  { id:"420", name:"Augustiner 0,25", category:"Bier", price:3.20, options:[] },
-  { id:"421", name:"Augustiner 0,5", category:"Bier", price:5.10, options:[] },
-  { id:"424", name:"Hefe Weizen 0,3", category:"Bier", price:3.70, options:["Banane"] },
-  { id:"425", name:"Hefe Weizen 0,5", category:"Bier", price:5.10, options:["Banane"] },
-  { id:"440", name:"Hefe 0,0% Alk 0,3", category:"Bier", price:3.60, options:["Banane"] },
-  { id:"441", name:"Hefe 0,0% Alk 0,5", category:"Bier", price:4.80, options:["Banane"] },
-  { id:"428", name:"Alster Mit Fassb. 0,3", category:"Bier", price:3.60, options:[] },
-  { id:"429", name:"Alster Mit Fassb. 0,4", category:"Bier", price:4.40, options:[] },
-  { id:"430", name:"Berliner Weisse Rot", category:"Bier", price:3.80, options:[] },
-  { id:"431", name:"Berliner Weisse Grün", category:"Bier", price:3.80, options:[] },
-  { id:"437", name:"Radler", category:"Bier", price:3.80, options:[] },
-  { id:"458", name:"Dju Dju Mango", category:"Bier", price:4.90, options:["Glas"] },
-  { id:"436", name:"Peroni", category:"Bier", price:4.10, options:["Glas"] },
-  { id:"442", name:"Peroni 0,0%", category:"Bier", price:4.10, options:["Glas"] },
-  { id:"443", name:"Malzbier 0,0%", category:"Bier", price:3.50, options:["Glas"] },
-  { id:"222", name:"Französisches Frühstück", category:"Frühstücke", price:10.70, options:[] },
-  { id:"279", name:"* Milchkaffee -> Franz. Frühst.", category:"Frühstücke", price:0.00, options:[] },
-  { id:"223", name:"Bretonisches Frühstück", category:"Frühstücke", price:10.70, options:[] },
-  { id:"280", name:"Heisse Schoko -> Breto, Früh.", category:"Frühstücke", price:0.00, options:[] },
-  { id:"224", name:"Excess Frühstück", category:"Frühstücke", price:12.70, options:[] },
-  { id:"282", name:"* Milchkaffee -> Excess Frühst.", category:"Frühstücke", price:0.00, options:[] },
-  { id:"216", name:"Erste Liebe", category:"Frühstücke", price:13.50, options:[] },
-  { id:"278", name:"* Frischer Osaft -> Erste Liebe", category:"Frühstücke", price:0.00, options:[] },
-  { id:"202", name:"Green Velvet Vegan", category:"Frühstücke", price:17.00, options:[] },
-  { id:"210", name:"Gemischtes Frühstück", category:"Frühstücke", price:14.80, options:[] },
-  { id:"211", name:"Käse Frühstück", category:"Frühstücke", price:14.80, options:[] },
-  { id:"212", name:"Schinken Frühstück", category:"Frühstücke", price:14.80, options:[] },
-  { id:"213", name:"Tiffany", category:"Frühstücke", price:16.50, options:[] },
-  { id:"215", name:"Aroma Plus", category:"Frühstücke", price:12.80, options:[] },
-  { id:"217", name:"Späte Liebe", category:"Frühstücke", price:16.50, options:[] },
-  { id:"218", name:"Casablanca", category:"Frühstücke", price:14.80, options:[] },
-  { id:"219", name:"Love On The Run", category:"Frühstücke", price:16.50, options:[] },
-  { id:"220", name:"Avocado Frühstück", category:"Frühstücke", price:16.50, options:[] },
-  { id:"221", name:"Lachsfrühstück Für 2", category:"Frühstücke", price:28.00, options:[] },
-  { id:"172", name:"English Sense", category:"Frühstücke", price:17.50, options:[] },
-  { id:"240", name:"Eier Im Glas", category:"Eier / Sandwiches", price:9.00, options:["Vollkorn"] },
-  { id:"241", name:"Rührei Schafskäse & Tomate", category:"Eier / Sandwiches", price:11.80, options:["Vollkorn"] },
-  { id:"126", name:"Rührei Champignon", category:"Eier / Sandwiches", price:10.30, options:["Vollkorn"] },
-  { id:"129", name:"Rührei Kräuter", category:"Eier / Sandwiches", price:9.50, options:["Vollkorn"] },
-  { id:"242", name:"Rührei Natur", category:"Eier / Sandwiches", price:9.00, options:["Vollkorn"] },
-  { id:"244", name:"Rührei Schinken", category:"Eier / Sandwiches", price:11.00, options:["Vollkorn"] },
-  { id:"283", name:"Rührei Bacon", category:"Eier / Sandwiches", price:11.00, options:["Vollkorn"] },
-  { id:"243", name:"Spiegeleier Natur", category:"Eier / Sandwiches", price:9.00, options:["Vollkorn"] },
-  { id:"284", name:"Spiegeleier Bacon", category:"Eier / Sandwiches", price:11.00, options:["Vollkorn"] },
-  { id:"245", name:"Spiegeleier Schinken", category:"Eier / Sandwiches", price:11.00, options:["Vollkorn"] },
-  { id:"119", name:"Omlette Natur", category:"Eier / Sandwiches", price:9.80, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"138", name:"Kaseomlette", category:"Eier / Sandwiches", price:11.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"140", name:"Schinken-Champignon Omlette", category:"Eier / Sandwiches", price:13.10, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"142", name:"Bauernomlette", category:"Eier / Sandwiches", price:15.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"144", name:"Toast Mozzarella", category:"Eier / Sandwiches", price:15.20, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
-  { id:"145", name:"Toast Schafskäse & Ei", category:"Eier / Sandwiches", price:15.30, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
-  { id:"146", name:"Toast Lachs", category:"Eier / Sandwiches", price:14.60, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
-  { id:"147", name:"Rucolabaguette + Schinken", category:"Eier / Sandwiches", price:13.80, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"148", name:"Kasebaguette", category:"Eier / Sandwiches", price:10.10, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"149", name:"Schinkenbaguette", category:"Eier / Sandwiches", price:10.10, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"150", name:"Salamibaguette", category:"Eier / Sandwiches", price:11.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"180", name:"Club Sandwich Classic", category:"Eier / Sandwiches", price:13.30, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"181", name:"Club Sandwich Mango", category:"Eier / Sandwiches", price:13.80, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"x-club-vegi", name:"Club Sandwich Vegi", category:"Eier / Sandwiches", price:0.00, options:[] },
-  { id:"230", name:"Joghurt + Früchte", category:"Frische Früchte", price:10.00, options:["2 Besteck"] },
-  { id:"231", name:"Quark + Früchte", category:"Frische Früchte", price:11.00, options:["3 Besteck"] },
-  { id:"232", name:"Obstsalat", category:"Frische Früchte", price:10.00, options:["4 Besteck"] },
-  { id:"233", name:"Müsli + Früchte", category:"Frische Früchte", price:11.00, options:["5 Besteck"] },
-  { id:"234", name:"Cornflakes Pur", category:"Frische Früchte", price:5.90, options:["6 Besteck", "Laktosefrei"] },
-  { id:"287", name:"Gem. Eis / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:7.20, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"288", name:"Gem. Eis + Sahne / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:9.00, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"289", name:"Kids Cup / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:6.70, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"290", name:"Tutti Fruity / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:10.60, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"291", name:"Bananensplit", category:"Eisbecher /Shakes", price:9.50, options:[] },
-  { id:"292", name:"Eiskaffee", category:"Eisbecher /Shakes", price:8.50, options:[] },
-  { id:"293", name:"Eisschokolade", category:"Eisbecher /Shakes", price:8.50, options:[] },
-  { id:"294", name:"Heiss-Kalt", category:"Eisbecher /Shakes", price:6.70, options:[] },
-  { id:"295", name:"Tokio", category:"Eisbecher /Shakes", price:8.50, options:[] },
-  { id:"296", name:"Metro", category:"Eisbecher /Shakes", price:8.50, options:[] },
-  { id:"297", name:"Dresden", category:"Eisbecher /Shakes", price:7.50, options:[] },
-  { id:"300", name:"Passion", category:"Eisbecher /Shakes", price:8.70, options:[] },
-  { id:"302", name:"Sunday", category:"Eisbecher /Shakes", price:8.70, options:[] },
-  { id:"303", name:"Monday", category:"Eisbecher /Shakes", price:8.70, options:[] },
-  { id:"304", name:"Bergamo", category:"Eisbecher /Shakes", price:8.70, options:[] },
-  { id:"305", name:"Kugel Eis", category:"Eisbecher /Shakes", price:2.70, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"306", name:"+ 1 Extra Kugel Eis", category:"Eisbecher /Shakes", price:2.20, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"106", name:"Portion Sahne -> Küche", category:"Eisbecher /Shakes", price:0.00, options:[] },
-  { id:"285", name:"Shake / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:0.00, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
-  { id:"286", name:"Bananenshake", category:"Eisbecher /Shakes", price:0.00, options:[] },
-  { id:"121", name:"Linsensuppe", category:"Vorspeisen / Salate", price:7.90, options:[] },
-  { id:"122", name:"Kartoffel-Kürbis Suppe", category:"Vorspeisen / Salate", price:8.50, options:[] },
-  { id:"182", name:"Suppe Der Woche", category:"Vorspeisen / Salate", price:0.00, options:[] },
-  { id:"188", name:"Suppe Der Woche Vegetarisch", category:"Vorspeisen / Salate", price:0.00, options:[] },
-  { id:"164", name:"Bruschetta Classic 8 Stk", category:"Vorspeisen / Salate", price:9.20, options:[] },
-  { id:"176", name:"Bruschetta Olive 6 Stk", category:"Vorspeisen / Salate", price:8.60, options:[] },
-  { id:"177", name:"Bruschetta Pesto & Schinken 6 Stk", category:"Vorspeisen / Salate", price:8.60, options:[] },
-  { id:"178", name:"Bruschetta Pesto 6 Stk", category:"Vorspeisen / Salate", price:8.60, options:[] },
-  { id:"120", name:"Bruschetta Mix", category:"Vorspeisen / Salate", price:0.00, options:[] },
-  { id:"179", name:"Hummus", category:"Vorspeisen / Salate", price:12.30, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"159", name:"Gebackener Camembert", category:"Vorspeisen / Salate", price:14.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"127", name:"kleiner Beilagensalat (Feldsalat)", category:"Vorspeisen / Salate", price:5.50, options:[] },
-  { id:"130", name:"kleiner Gemischter Salat", category:"Vorspeisen / Salate", price:8.40, options:[] },
-  { id:"131", name:"grosser Gemischter Salat", category:"Vorspeisen / Salate", price:12.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"132", name:"Schafskäsesalat", category:"Vorspeisen / Salate", price:14.70, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"134", name:"Rucolasalat", category:"Vorspeisen / Salate", price:15.20, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"135", name:"Caprese (Tomate-Mozarella)", category:"Vorspeisen / Salate", price:15.80, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"175", name:"Feldsalat an Maultaschen", category:"Vorspeisen / Salate", price:14.70, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"123", name:"Menü 1", category:"Hauptspeisen / Pasta", price:11.00, options:[] },
-  { id:"124", name:"Menü 2 Vegetarisch", category:"Hauptspeisen / Pasta", price:11.00, options:[] },
-  { id:"160", name:"Wiener Schnitzel", category:"Hauptspeisen / Pasta", price:12.80, options:["Bratkartoffeln", "Schwenkkartoffeln", "Preisselbeeren"] },
-  { id:"169", name:"1/2 Portion Wiener Schnitzel", category:"Hauptspeisen / Pasta", price:0.00, options:["Bratkartoffeln", "Schwenkkartoffeln", "Preisselbeeren"] },
-  { id:"163", name:"Linsen-Möhren Curry", category:"Hauptspeisen / Pasta", price:15.80, options:[] },
-  { id:"154", name:"Rumpsteak & Kartoffeln", category:"Hauptspeisen / Pasta", price:28.80, options:["Bratkartoffeln"] },
-  { id:"128", name:"Lachsfilet & Spinat", category:"Hauptspeisen / Pasta", price:27.00, options:[] },
-  { id:"174", name:"Serviettenknödel", category:"Hauptspeisen / Pasta", price:18.10, options:[] },
-  { id:"173", name:"Vegetarische Reispfanne", category:"Hauptspeisen / Pasta", price:14.80, options:[] },
-  { id:"162", name:"Spinatkäsespätzle", category:"Hauptspeisen / Pasta", price:16.80, options:[] },
-  { id:"168", name:"Caramelle Gorgonzola", category:"Hauptspeisen / Pasta", price:16.80, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"165", name:"Tagliatelle Pilzragout", category:"Hauptspeisen / Pasta", price:16.00, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"170", name:"Gnocchi Ziegenkäse", category:"Hauptspeisen / Pasta", price:17.00, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"167", name:"Spaghetti Napoli", category:"Hauptspeisen / Pasta", price:12.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"141", name:"Spaghetti Pesto", category:"Hauptspeisen / Pasta", price:12.70, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"118", name:"Spaghetti Garnele", category:"Hauptspeisen / Pasta", price:21.30, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei", "extra Garnele"] },
-  { id:"161", name:"Spinat-Schafskäse Lasagne", category:"Hauptspeisen / Pasta", price:15.70, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
-  { id:"274", name:"Spaghetti Kinder", category:"Hauptspeisen / Pasta", price:0.00, options:["glutenfrei"] },
-  { id:"411", name:"Gutenfrei", category:"Hauptspeisen / Pasta", price:1.00, options:[] },
-  { id:"80", name:"Apfelkuchen vegan", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"81", name:"Käsekuchen", category:"Kuchen / Desserts", price:4.80, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"83", name:"Schokokuchen", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"85", name:"Orangenkuchen glutenfree", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"87", name:"Karrottenkuchen", category:"Kuchen / Desserts", price:4.80, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"88", name:"Brownie", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"93", name:"Mohnkuchen", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"95", name:"Bananenkuchen", category:"Kuchen / Desserts", price:4.50, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
-  { id:"82", name:"Monkey Dream", category:"Kuchen / Desserts", price:8.20, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"101", name:"Squirrles Nibble", category:"Kuchen / Desserts", price:8.70, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"102", name:"Death By Chocolate", category:"Kuchen / Desserts", price:9.20, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"103", name:"Pomme", category:"Kuchen / Desserts", price:8.40, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"104", name:"Pomme Royale", category:"Kuchen / Desserts", price:9.20, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"105", name:"Portion Sahne", category:"Kuchen / Desserts", price:1.90, options:[] },
-  { id:"x-kugel-eis", name:"Kugel Eis", category:"Kuchen / Desserts", price:2.70, options:[] },
-  { id:"98", name:"Kaiserschmarrn", category:"Kuchen / Desserts", price:15.30, options:["Eis getrennt", "ohne Rosinen", "2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"110", name:"Creme Brulée", category:"Kuchen / Desserts", price:8.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"11", name:"Crepe Nuss Nougat", category:"Kuchen / Desserts", price:9.70, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"112", name:"Crepe Backapfel", category:"Kuchen / Desserts", price:11.50, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"113", name:"Crepe Banane", category:"Kuchen / Desserts", price:11.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"114", name:"Crepe Marmelade", category:"Kuchen / Desserts", price:9.10, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"158", name:"Crepe Zucker & Zimt", category:"Kuchen / Desserts", price:9.10, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"157", name:"Crepe Vanile Quark", category:"Kuchen / Desserts", price:11.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"190", name:"Dessert Der Woche", category:"Kuchen / Desserts", price:0.00, options:[] },
-  { id:"90", name:"Apfelstrudel Pur", category:"Kuchen / Desserts", price:0.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"96", name:"Apfelstrudel + Vanillesauce", category:"Kuchen / Desserts", price:10.40, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"97", name:"Apfelstrudel + Eis + Sahne", category:"Kuchen / Desserts", price:11.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"189", name:"Käseplatte Feigensenf", category:"Kuchen / Desserts", price:13.00, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
-  { id:"530", name:"Brandstifter Ginger", category:"Longdrinks", price:9.00, options:[] },
-  { id:"516", name:"Campari Orange", category:"Longdrinks", price:9.50, options:[] },
-  { id:"517", name:"Campari Soda", category:"Longdrinks", price:9.00, options:[] },
-  { id:"518", name:"Cuba Libre", category:"Longdrinks", price:9.50, options:[] },
-  { id:"506", name:"Cynar Tonic", category:"Longdrinks", price:8.50, options:[] },
-  { id:"523", name:"Fernet Cola", category:"Longdrinks", price:9.00, options:[] },
-  { id:"520", name:"Gin Tonic Xix", category:"Longdrinks", price:9.00, options:[] },
-  { id:"521", name:"Gin Lemon Xix", category:"Longdrinks", price:9.00, options:[] },
-  { id:"514", name:"Labarabarba", category:"Longdrinks", price:10.00, options:[] },
-  { id:"524", name:"Lillet Tonic", category:"Longdrinks", price:8.50, options:[] },
-  { id:"525", name:"Pisco Cola", category:"Longdrinks", price:9.00, options:[] },
-  { id:"515", name:"Rum Cola", category:"Longdrinks", price:9.00, options:[] },
-  { id:"538", name:"Scotch Soda", category:"Longdrinks", price:9.00, options:[] },
-  { id:"528", name:"Southern Ginger", category:"Longdrinks", price:8.50, options:[] },
-  { id:"643", name:"Spanische Milch", category:"Longdrinks", price:8.20, options:[] },
-  { id:"531", name:"Tequila Silver Tonic", category:"Longdrinks", price:9.00, options:[] },
-  { id:"533", name:"Tullamore Ginger", category:"Longdrinks", price:9.00, options:[] },
-  { id:"505", name:"Wermut Tonic", category:"Longdrinks", price:10.00, options:[] },
-  { id:"537", name:"Whiskey Cola", category:"Longdrinks", price:10.00, options:[] },
-  { id:"534", name:"Wodka Lemon", category:"Longdrinks", price:9.00, options:[] },
-  { id:"519", name:"Wodka Maracuja", category:"Longdrinks", price:10.00, options:[] },
-  { id:"637", name:"Wodka Mate", category:"Longdrinks", price:10.00, options:[] },
-  { id:"535", name:"Wodka Orange", category:"Longdrinks", price:10.00, options:[] },
-  { id:"522", name:"Wodka Soda", category:"Longdrinks", price:9.00, options:[] },
-  { id:"536", name:"Wodka Tonic", category:"Longdrinks", price:9.00, options:[] },
-  { id:"2---", name:"doppelt 2cl auf 4cl", category:"Longdrinks", price:0.00, options:[] },
-  { id:"676", name:"Portwein Fine Twany", category:"Aperitif 5cl", price:5.00, options:["auf Eis"] },
-  { id:"668", name:"Lilliet Blanc", category:"Aperitif 5cl", price:5.20, options:["auf Eis"] },
-  { id:"665", name:"Sherry Fino", category:"Aperitif 5cl", price:5.00, options:["auf Eis"] },
-  { id:"671", name:"Aperol", category:"Aperitif 5cl", price:0.00, options:["auf Eis"] },
-  { id:"672", name:"Campari", category:"Aperitif 5cl", price:5.20, options:["auf Eis"] },
-  { id:"669", name:"Noilly Prat", category:"Aperitif 5cl", price:5.20, options:["auf Eis"] },
-  { id:"670", name:"Antica Formular", category:"Aperitif 5cl", price:6.20, options:["auf Eis"] },
-  { id:"674", name:"Pernod", category:"Pastis 2cl", price:5.00, options:[] },
-  { id:"675", name:"Ricard", category:"Pastis 2cl", price:5.00, options:[] },
-  { id:"600", name:"Pisco", category:"Schnaps 2 cl", price:5.20, options:["auf Eis"] },
-  { id:"601", name:"Brandstifter", category:"Schnaps 2 cl", price:3.80, options:["auf Eis"] },
-  { id:"604", name:"Wodka Owls", category:"Schnaps 2 cl", price:3.50, options:["auf Eis"] },
-  { id:"605", name:"Tequila Weiss/Silver", category:"Schnaps 2 cl", price:3.50, options:["auf Eis"] },
-  { id:"606", name:"Tequila Braun/Gold", category:"Schnaps 2 cl", price:3.50, options:["auf Eis"] },
-  { id:"607", name:"Xix Gin", category:"Schnaps 2 cl", price:3.80, options:["auf Eis"] },
-  { id:"608", name:"Mezcal", category:"Schnaps 2 cl", price:4.20, options:["auf Eis"] },
-  { id:"630", name:"Osborne 103", category:"Schnaps 2 cl", price:0.00, options:["auf Eis"] },
-  { id:"681", name:"Averna", category:"Digestif 2cl", price:3.80, options:["auf Eis"] },
-  { id:"682", name:"Fernet Branca", category:"Digestif 2cl", price:4.20, options:["auf Eis"] },
-  { id:"630", name:"Bobadillio 103", category:"Digestif 2cl", price:0.00, options:["auf Eis"] },
-  { id:"634", name:"Remy Martin", category:"Digestif 2cl", price:5.80, options:["auf Eis"] },
-  { id:"635", name:"Calvados", category:"Digestif 2cl", price:4.20, options:["auf Eis"] },
-  { id:"673", name:"Cynar", category:"Digestif 2cl", price:3.80, options:["auf Eis"] },
-  { id:"680", name:"Kr23", category:"Digestif 2cl", price:3.70, options:["auf Eis"] },
-  { id:"609", name:"Williams Birne", category:"Digestif 2cl", price:5.80, options:["auf Eis"] },
-  { id:"602", name:"Grappa Tedeschi", category:"Digestif 2cl", price:5.20, options:["auf Eis"] },
-  { id:"648", name:"Baileys", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"649", name:"Sambuca", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"650", name:"Amaretto", category:"Likör 2cl", price:3.00, options:["auf Eis"] },
-  { id:"652", name:"Eierlikör", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"655", name:"Berliner Luft", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"660", name:"Likör 43", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"620", name:"Southern Comfort", category:"Likör 2cl", price:3.50, options:["auf Eis"] },
-  { id:"541", name:"Americano Cocktail", category:"Cocktails", price:11.00, options:[] },
-  { id:"544", name:"Amaretto Sour", category:"Cocktails", price:11.00, options:[] },
-  { id:"509", name:"Averna Sour", category:"Cocktails", price:11.00, options:[] },
-  { id:"198", name:"Absinth Sour", category:"Cocktails", price:13.00, options:[] },
-  { id:"196", name:"Aperol Sour", category:"Cocktails", price:0.00, options:[] },
-  { id:"197", name:"Boogie Boy", category:"Cocktails", price:13.00, options:[] },
-  { id:"543", name:"Black Russian", category:"Cocktails", price:0.00, options:[] },
-  { id:"545", name:"Bloody Mary", category:"Cocktails", price:12.50, options:[] },
-  { id:"546", name:"Boulvardier", category:"Cocktails", price:13.00, options:[] },
-  { id:"561", name:"Berlin Mule Brandstifter", category:"Cocktails", price:11.00, options:[] },
-  { id:"548", name:"Caipirinha", category:"Cocktails", price:12.00, options:[] },
-  { id:"555", name:"Cosmopolitan", category:"Cocktails", price:13.00, options:[] },
-  { id:"552", name:"Daiquiri", category:"Cocktails", price:12.00, options:[] },
-  { id:"551", name:"Dark and Stormy", category:"Cocktails", price:0.00, options:[] },
-  { id:"512", name:"Espresso Martini", category:"Cocktails", price:12.00, options:[] },
-  { id:"598", name:"French 78", category:"Cocktails", price:10.00, options:[] },
-  { id:"597", name:"Gin Basil Smash", category:"Cocktails", price:13.00, options:[] },
-  { id:"556", name:"Gimlet", category:"Cocktails", price:0.00, options:[] },
-  { id:"557", name:"Gin Fizz", category:"Cocktails", price:12.00, options:[] },
-  { id:"559", name:"Honolulu Juicer", category:"Cocktails", price:13.00, options:[] },
-  { id:"560", name:"Lebowski (White Russian)", category:"Cocktails", price:12.00, options:[] },
-  { id:"558", name:"London Mule Gin", category:"Cocktails", price:11.00, options:[] },
-  { id:"553", name:"Mandarin Dream", category:"Cocktails", price:0.00, options:[] },
-  { id:"562", name:"Spicy Margarita", category:"Cocktails", price:12.00, options:[] },
-  { id:"563", name:"Marshmellow Lemo", category:"Cocktails", price:13.00, options:[] },
-  { id:"581", name:"Marhula", category:"Cocktails", price:12.00, options:[] },
-  { id:"511", name:"Mezcal Margarita", category:"Cocktails", price:0.00, options:[] },
-  { id:"578", name:"Mexican Mule Tequila", category:"Cocktails", price:0.00, options:[] },
-  { id:"577", name:"Moscow Mule Wodka", category:"Cocktails", price:11.00, options:[] },
-  { id:"510", name:"Mezcal Sour", category:"Cocktails", price:13.00, options:[] },
-  { id:"580", name:"Mai Tai", category:"Cocktails", price:14.00, options:[] },
-  { id:"513", name:"Manhatten Classic", category:"Cocktails", price:12.00, options:[] },
-  { id:"564", name:"Martini Dry Cocktail", category:"Cocktails", price:11.00, options:[] },
-  { id:"565", name:"Mojito", category:"Cocktails", price:12.50, options:[] },
-  { id:"573", name:"Mezca Mule", category:"Cocktails", price:11.00, options:[] },
-  { id:"576", name:"New York Sour", category:"Cocktails", price:13.00, options:[] },
-  { id:"566", name:"Negroni", category:"Cocktails", price:12.00, options:[] },
-  { id:"628", name:"Old Fashioned", category:"Cocktails", price:12.50, options:[] },
-  { id:"575", name:"Orange Thyme Smash", category:"Cocktails", price:13.00, options:[] },
-  { id:"571", name:"Torino Smash", category:"Cocktails", price:12.50, options:[] },
-  { id:"568", name:"Pisco Sour", category:"Cocktails", price:12.50, options:[] },
-  { id:"579", name:"Whiskey Sour", category:"Cocktails", price:13.00, options:[] },
-  { id:"540", name:"Eiweiß statt AquaFaba", category:"Cocktails", price:1.00, options:[] },
-  { id:"584", name:"Capi Ginger", category:"alkoholfreie Cocktails", price:8.00, options:[] },
-  { id:"588", name:"Mosquito", category:"alkoholfreie Cocktails", price:8.00, options:[] },
-  { id:"590", name:"Pony Cocktail", category:"alkoholfreie Cocktails", price:8.00, options:[] },
-  { id:"593", name:"S.C. Cocktail", category:"alkoholfreie Cocktails", price:9.00, options:[] },
-  { id:"594", name:"Virgin Mary", category:"alkoholfreie Cocktails", price:0.00, options:[] },
-  { id:"627", name:"Bulleit 95", category:"Whiskey 2cl", price:5.90, options:["auf Eis", "Wasser"] },
-  { id:"617", name:"Ballentines", category:"Whiskey 2cl", price:5.20, options:["auf Eis", "Wasser"] },
-  { id:"616", name:"Canadian", category:"Whiskey 2cl", price:5.20, options:["auf Eis", "Wasser"] },
-  { id:"624", name:"Four Roses", category:"Whiskey 2cl", price:5.90, options:["auf Eis", "Wasser"] },
-  { id:"625", name:"Glenmorangie", category:"Whiskey 2cl", price:6.90, options:["auf Eis", "Wasser"] },
-  { id:"622", name:"Glenfiddich", category:"Whiskey 2cl", price:6.90, options:["auf Eis", "Wasser"] },
-  { id:"621", name:"Jack Daniels", category:"Whiskey 2cl", price:5.90, options:["auf Eis", "Wasser"] },
-  { id:"623", name:"Laphroig", category:"Whiskey 2cl", price:6.90, options:["auf Eis", "Wasser"] },
-  { id:"626", name:"Makers Mark", category:"Whiskey 2cl", price:5.90, options:["auf Eis", "Wasser"] },
-  { id:"619", name:"Tullamore", category:"Whiskey 2cl", price:5.20, options:["auf Eis", "Wasser"] },
-  { id:"482", name:"Tabu Grün", category:"Absinth 2cl", price:6.00, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
-  { id:"485", name:"Tabu Dry", category:"Absinth 2cl", price:6.00, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
-  { id:"486", name:"Tabu Classic 73%", category:"Absinth 2cl", price:6.50, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
-  { id:"469", name:"Tabu Red", category:"Absinth 2cl", price:6.00, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
-  { id:"640", name:"Cuate 13", category:"Rum 2cl", price:5.20, options:["auf Eis"] },
-  { id:"641", name:"Cuate 4", category:"Rum 2cl", price:4.80, options:["auf Eis"] },
-  { id:"642", name:"Cuate 1", category:"Rum 2cl", price:4.40, options:["auf Eis"] }
+  { id:"1", name:"Espresso", category:"warme Getränke", price:2.2, options:["Macchiato", "Milch", "Koffeinfrei"] },
+  { id:"2", name:"Espresso + Sahne", category:"warme Getränke", price:2.8, options:["Koffeinfrei"] },
+  { id:"3", name:"Dopp. Espresso", category:"warme Getränke", price:3.2, options:["Macchiato", "Milch", "Koffeinfrei"] },
+  { id:"4", name:"Dopp. Espresso + Sahne", category:"warme Getränke", price:3.8, options:["Koffeinfrei"] },
+  { id:"5", name:"Verläng. Espress", category:"warme Getränke", price:2.8, options:["Macchiato", "Milch", "Koffeinfrei"] },
+  { id:"6", name:"Verläng. Espresso + Sahne", category:"warme Getränke", price:3.4, options:["Koffeinfrei"] },
+  { id:"8", name:"Cappuccino", category:"warme Getränke", price:3.8, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"9", name:"Dopp. Cappu", category:"warme Getränke", price:4.8, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"48", name:"Cappuccino Koffeinfrei", category:"warme Getränke", price:4.8, options:["Hafer", "Laktosefrei"] },
+  { id:"12", name:"Flat White", category:"warme Getränke", price:4.5, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"11", name:"Schale Milchkaffe", category:"warme Getränke", price:5.0, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"49", name:"Milchkaffee Koffeinfrei", category:"warme Getränke", price:5.0, options:["Hafer", "Laktosefrei"] },
+  { id:"13", name:"Kleiner Milchkaffee", category:"warme Getränke", price:4.0, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"50", name:"Latte Macchiato", category:"warme Getränke", price:5.0, options:["Hafer", "Laktosefrei"] },
+  { id:"28", name:"Latte Mac Koffeinfrei", category:"warme Getränke", price:5.0, options:["Hafer", "Laktosefrei"] },
+  { id:"57", name:"Dopp. Latte Macchiato", category:"warme Getränke", price:6.0, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"43", name:"Kleiner Latte Macchiato", category:"warme Getränke", price:4.0, options:["Hafer", "Laktosefrei", "Koffeinfrei"] },
+  { id:"19", name:"Latte Mac + Vanille", category:"warme Getränke", price:5.3, options:["Hafer", "Laktosefrei"] },
+  { id:"10", name:"Latte Mac + Karamel", category:"warme Getränke", price:5.3, options:["Hafer", "Laktosefrei"] },
+  { id:"15", name:"Getreidemilchkaffee", category:"warme Getränke", price:5.0, options:["Hafer", "Laktosefrei"] },
+  { id:"47", name:"Kleiner Getreidemilchkaffee", category:"warme Getränke", price:2.8, options:["Hafer", "Laktosefrei"] },
+  { id:"16", name:"Tasse Kaffee Crema", category:"warme Getränke", price:2.8, options:["Hafer", "Milch", "Laktosefrei"] },
+  { id:"20", name:"Tasse Kaffee Koffeinfrei", category:"warme Getränke", price:2.8, options:["Hafer", "Milch", "Laktosefrei"] },
+  { id:"18", name:"Schale Kaffee", category:"warme Getränke", price:4.9, options:["Hafer", "Milch", "Laktosefrei"] },
+  { id:"21", name:"Schale Kaffee Koffeinfrei", category:"warme Getränke", price:4.9, options:["Hafer", "Milch", "Laktosefrei"] },
+  { id:"14", name:"Americano Kaffee", category:"warme Getränke", price:2.8, options:["Hafer", "Milch", "Laktosefrei", "Koffeinfrei"] },
+  { id:"40", name:"Heisse Schoko", category:"warme Getränke", price:4.2, options:["Hafer"] },
+  { id:"39", name:"Heisse Schoko + Sahne", category:"warme Getränke", price:4.8, options:[] },
+  { id:"2040", name:"Grosse Heisse Schoko", category:"warme Getränke", price:5.2, options:["Hafer"] },
+  { id:"2039", name:"Grosse Heisse Schoko + Sahne", category:"warme Getränke", price:5.8, options:[] },
+  { id:"41", name:"Glas kalte Milch", category:"warme Getränke", price:3.0, options:["Hafer", "Laktosefrei"] },
+  { id:"42", name:"Heisse Milch", category:"warme Getränke", price:3.5, options:["Hafer", "Laktosefrei"] },
+  { id:"44", name:"Heisse Milch + Honig", category:"warme Getränke", price:4.5, options:["Hafer", "Laktosefrei"] },
+  { id:"52", name:"Grog 2cl", category:"warme Getränke", price:5.0, options:[] },
+  { id:"53", name:"Grog 4cl", category:"warme Getränke", price:7.5, options:[] },
+  { id:"65", name:"Irish Coffee", category:"warme Getränke", price:8.0, options:[] },
+  { id:"66", name:"New Romantik", category:"warme Getränke", price:5.5, options:[] },
+  { id:"67", name:"Reine Nervensache", category:"warme Getränke", price:5.5, options:[] },
+  { id:"450", name:"Glühwein", category:"warme Getränke", price:5.5, options:[] },
+  { id:"79", name:"mit Schuss 2cl", category:"warme Getränke", price:3.5, options:[] },
+  { id:"60", name:"Frischer Ingwer Tee + Minze", category:"Tee", price:5.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"61", name:"Frischer Ingwer Tee + Zitrone", category:"Tee", price:5.2, options:["Honig", "Milch"] },
+  { id:"17", name:"Frischer Ingwer Tee + Honig", category:"Tee", price:4.8, options:["Honig", "Zitrone", "Milch"] },
+  { id:"7", name:"Frischer Minze Tee", category:"Tee", price:4.8, options:["Honig", "Zitrone", "Milch"] },
+  { id:"22", name:"Tasse Schwarzer Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"23", name:"Tasse Pfefferminz Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"24", name:"Tasse Kamillen Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"25", name:"Tasse Ingwer Lemon Tee", category:"Tee", price:3.0, options:["Honig", "Milch"] },
+  { id:"26", name:"Tasse Kräuter Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"27", name:"Tasse Fenchel Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"56", name:"Tasse Sanddorn Orange", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"45", name:"Tasse Grüner Tee", category:"Tee", price:3.0, options:["Honig", "Zitrone", "Milch"] },
+  { id:"29", name:"Känn. Darjeeling", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"30", name:"Känn. Ostfriese Assam", category:"Tee", price:6.2, options:["Honig", "Zitrone"] },
+  { id:"31", name:"Känn. Jasmin", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"32", name:"Känn. White Monkey", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"34", name:"Känn. Blütentraum", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"59", name:"Känn. Quelle", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"35", name:"Känn. Earl Grey", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"36", name:"Känn. Nana Minze", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"37", name:"Känn. Japan Sencha Grün", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"38", name:"Känn. Roibush-Lemon", category:"Tee", price:6.2, options:["Honig", "Zitrone", "Milch"] },
+  { id:"46", name:"Heisse Zitrone", category:"Tee", price:4.8, options:[] },
+  { id:"350", name:"Wasser Medium 0,33", category:"Soft Drinks", price:3.0, options:[] },
+  { id:"353", name:"Wasser Medium 1L", category:"Soft Drinks", price:7.2, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"354", name:"Wasser Still 0,33", category:"Soft Drinks", price:3.0, options:[] },
+  { id:"355", name:"Wasser Still 1L", category:"Soft Drinks", price:7.2, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"700", name:"Leitungswasser", category:"Soft Drinks", price:0.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"352", name:"Lindy Lush (Sommer Limo)", category:"Soft Drinks", price:5.0, options:[] },
+  { id:"374", name:"Fassbrause", category:"Soft Drinks", price:3.5, options:[] },
+  { id:"379", name:"Kombucha", category:"Soft Drinks", price:4.5, options:[] },
+  { id:"461", name:"Zisch Matcha", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"462", name:"Zisch Mate", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"361", name:"Fitz Zitrone", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"356", name:"Fritz Orange", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"357", name:"Fritz Cola", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"359", name:"Fritz Cola Zuckerfrei", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"362", name:"Fritz Mischmasch", category:"Soft Drinks", price:4.0, options:[] },
+  { id:"369", name:"Bitter Lemon", category:"Soft Drinks", price:3.7, options:[] },
+  { id:"370", name:"Tonic Water", category:"Soft Drinks", price:3.7, options:[] },
+  { id:"371", name:"Ginger Ale", category:"Soft Drinks", price:3.7, options:[] },
+  { id:"372", name:"Soda Water", category:"Soft Drinks", price:3.7, options:[] },
+  { id:"443", name:"Malzbier", category:"Soft Drinks", price:3.5, options:[] },
+  { id:"365", name:"kleine Apfelschorle", category:"Säfte / Schorlen", price:3.5, options:[] },
+  { id:"366", name:"große Apfelschorle", category:"Säfte / Schorlen", price:4.7, options:[] },
+  { id:"368", name:"kleine Schorle Saft -> Zusatztext", category:"Säfte / Schorlen", price:3.5, options:[] },
+  { id:"367", name:"große Schorle Saft-> Zusatztext", category:"Säfte / Schorlen", price:4.7, options:[] },
+  { id:"380", name:"Orangensaft", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"394", name:"Kirsch", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"463", name:"Mango", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"382", name:"Cranberry", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"383", name:"Ananas", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"384", name:"Maracuja", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"385", name:"Banane", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"386", name:"Tomate", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"387", name:"KiBa", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"396", name:"Johannisbeere", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"389", name:"Apfel", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"390", name:"Birne", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"391", name:"Rhabarber", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"393", name:"Traube", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"381", name:"Möhre", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"388", name:"Grosser Kiba / Mix Aus 2", category:"Säfte / Schorlen", price:3.9, options:[] },
+  { id:"395", name:"Grosser Saft 0,4  -> Zusatztext", category:"Säfte / Schorlen", price:5.9, options:[] },
+  { id:"400", name:"Orange", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"401", name:"Grapefruit", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"402", name:"Apfel", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"403", name:"Möhre", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"404", name:"Apfel-Möhre", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"405", name:"Apfel-Sellerie", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"406", name:"Orange-Apfel", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"409", name:"Orange-Möhre", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"410", name:"Orange-Grapefruit", category:"Frische Säfte", price:4.8, options:[] },
+  { id:"407", name:"Gemüse Mix", category:"Frische Säfte", price:5.5, options:[] },
+  { id:"408", name:"Obst Mix", category:"Frische Säfte", price:5.5, options:[] },
+  { id:"2---", name:"großer frischer Saft 0,4l", category:"Frische Säfte", price:8.5, options:[] },
+  { id:"445", name:"Wein 0,1L", category:"Weine", price:4.0, options:[] },
+  { id:"449", name:"Merlot 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"470", name:"Merlot 0,5", category:"Weine", price:14.5, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
+  { id:"444", name:"Cabernet Sauvignon 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"473", name:"Cabernet Sauvignon 0,5", category:"Weine", price:14.5, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
+  { id:"454", name:"Rosé 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"474", name:"Rosé 0,5", category:"Weine", price:14.5, options:[] },
+  { id:"465", name:"Grauburgunder 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"466", name:"Grauburgunder 0,5", category:"Weine", price:14.5, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
+  { id:"375", name:"Fl. Grauburgunder", category:"Weine", price:26.8, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"451", name:"Riesling 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"472", name:"Riesling 0,5", category:"Weine", price:14.5, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
+  { id:"481", name:"Fl. Riesling Messm.", category:"Weine", price:26.8, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"453", name:"Veltliner 0,2", category:"Weine", price:6.5, options:[] },
+  { id:"471", name:"Veltliner 0,5", category:"Weine", price:14.5, options:["2 Gläser", "3 Gläser", "4 Gläser"] },
+  { id:"455", name:"Weissweinschorle 0,2", category:"Weine", price:5.5, options:[] },
+  { id:"2459", name:"Weissweinschorle 0,5", category:"Weine", price:11.5, options:[] },
+  { id:"456", name:"Rotweinschorle 0,2", category:"Weine", price:5.5, options:[] },
+  { id:"2460", name:"Rotweinschorle 0,5", category:"Weine", price:11.5, options:[] },
+  { id:"480", name:"Fl. Le Caillou, Côtes du Rhône", category:"Weine", price:29.5, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"457", name:"Kir 0,2", category:"Weine", price:7.9, options:[] },
+  { id:"446", name:"Cidre", category:"Weine", price:5.3, options:[] },
+  { id:"491", name:"Sekt 0,1", category:"Sekt / Champagner", price:5.1, options:[] },
+  { id:"492", name:"Mimosa Sekt + O-Saft", category:"Sekt / Champagner", price:4.9, options:[] },
+  { id:"467", name:"Sekt + Eis 0,2", category:"Sekt / Champagner", price:7.5, options:[] },
+  { id:"452", name:"Prosecco + Eis 0,2", category:"Sekt / Champagner", price:7.5, options:[] },
+  { id:"493", name:"Prosecco 0,1", category:"Sekt / Champagner", price:5.1, options:[] },
+  { id:"526", name:"Aperol Spritz", category:"Sekt / Champagner", price:8.0, options:[] },
+  { id:"490", name:"Cynar Spritz", category:"Sekt / Champagner", price:8.0, options:[] },
+  { id:"527", name:"Campari Spritz", category:"Sekt / Champagner", price:8.0, options:[] },
+  { id:"507", name:"Hugo", category:"Sekt / Champagner", price:8.5, options:[] },
+  { id:"495", name:"Kir Royal", category:"Sekt / Champagner", price:6.5, options:[] },
+  { id:"494", name:"Fl. Piccolo Geldermann 0,2", category:"Sekt / Champagner", price:10.9, options:["2 Gläser"] },
+  { id:"496", name:"Fl. Prosecco 0,75", category:"Sekt / Champagner", price:27.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"497", name:"Fl. Sekt Riesling 0,75", category:"Sekt / Champagner", price:27.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"499", name:"Fl. Sekt Rotkäppchen 0,75", category:"Sekt / Champagner", price:25.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"501", name:"Fl. Champagner Legras 0,375L", category:"Sekt / Champagner", price:43.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"502", name:"Fl. Champagner Legras 0,75L", category:"Sekt / Champagner", price:87.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"500", name:"Fl. Champagner Moët Piccolo 0,2", category:"Sekt / Champagner", price:28.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"503", name:"Fl. Champagner Moët 0,375", category:"Sekt / Champagner", price:49.0, options:["2 Gläser", "3 Gläser", "4 Gläser", "6 Gläser"] },
+  { id:"419", name:"Pilsner Urquell 0,3", category:"Bier", price:3.7, options:[] },
+  { id:"418", name:"Pilsner Urquell 0,5", category:"Bier", price:5.1, options:[] },
+  { id:"420", name:"Augustiner 0,25", category:"Bier", price:3.2, options:[] },
+  { id:"421", name:"Augustiner 0,5", category:"Bier", price:5.1, options:[] },
+  { id:"424", name:"Hefe Weizen 0,3", category:"Bier", price:3.7, options:["Banane"] },
+  { id:"425", name:"Hefe Weizen 0,5", category:"Bier", price:5.1, options:["Banane"] },
+  { id:"440", name:"Hefe 0,0% Alk 0,3", category:"Bier", price:3.6, options:["Banane"] },
+  { id:"441", name:"Hefe 0,0% Alk 0,5", category:"Bier", price:4.8, options:["Banane"] },
+  { id:"428", name:"Alster Mit Fassb. 0,3", category:"Bier", price:3.6, options:[] },
+  { id:"429", name:"Alster Mit Fassb. 0,4", category:"Bier", price:4.4, options:[] },
+  { id:"430", name:"Berliner Weisse Rot", category:"Bier", price:3.8, options:[] },
+  { id:"431", name:"Berliner Weisse Grün", category:"Bier", price:3.8, options:[] },
+  { id:"437", name:"Radler", category:"Bier", price:3.8, options:[] },
+  { id:"458", name:"Dju Dju Mango", category:"Bier", price:4.9, options:["Glas"] },
+  { id:"436", name:"Peroni", category:"Bier", price:4.1, options:["Glas"] },
+  { id:"442", name:"Peroni 0,0%", category:"Bier", price:4.1, options:["Glas"] },
+  { id:"443", name:"Malzbier 0,0%", category:"Bier", price:3.5, options:["Glas"] },
+  { id:"222", name:"Französisches Frühstück", category:"Frühstücke", price:10.7, options:[] },
+  { id:"279", name:"* Milchkaffee -> Franz. Frühst.", category:"Frühstücke", price:0.0, options:[] },
+  { id:"223", name:"Bretonisches Frühstück", category:"Frühstücke", price:10.7, options:[] },
+  { id:"280", name:"Heisse Schoko -> Breto, Früh.", category:"Frühstücke", price:0.0, options:[] },
+  { id:"224", name:"Excess Frühstück", category:"Frühstücke", price:12.7, options:[] },
+  { id:"282", name:"* Milchkaffee -> Excess Frühst.", category:"Frühstücke", price:0.0, options:[] },
+  { id:"216", name:"Erste Liebe", category:"Frühstücke", price:13.5, options:[] },
+  { id:"278", name:"* Frischer Osaft -> Erste Liebe", category:"Frühstücke", price:0.0, options:[] },
+  { id:"202", name:"Green Velvet Vegan", category:"Frühstücke", price:17.0, options:[] },
+  { id:"210", name:"Gemischtes Frühstück", category:"Frühstücke", price:14.8, options:[] },
+  { id:"211", name:"Käse Frühstück", category:"Frühstücke", price:14.8, options:[] },
+  { id:"212", name:"Schinken Frühstück", category:"Frühstücke", price:14.8, options:[] },
+  { id:"213", name:"Tiffany", category:"Frühstücke", price:16.5, options:[] },
+  { id:"215", name:"Aroma Plus", category:"Frühstücke", price:12.8, options:[] },
+  { id:"217", name:"Späte Liebe", category:"Frühstücke", price:16.5, options:[] },
+  { id:"218", name:"Casablanca", category:"Frühstücke", price:14.8, options:[] },
+  { id:"219", name:"Love On The Run", category:"Frühstücke", price:16.5, options:[] },
+  { id:"220", name:"Avocado Frühstück", category:"Frühstücke", price:16.5, options:[] },
+  { id:"221", name:"Lachsfrühstück Für 2", category:"Frühstücke", price:28.0, options:[] },
+  { id:"172", name:"English Sense", category:"Frühstücke", price:17.5, options:[] },
+  { id:"240", name:"Eier Im Glas", category:"Eier / Sandwiches", price:9.0, options:["Vollkorn"] },
+  { id:"241", name:"Rührei Schafskäse & Tomate", category:"Eier / Sandwiches", price:11.8, options:["Vollkorn"] },
+  { id:"126", name:"Rührei Champignon", category:"Eier / Sandwiches", price:10.3, options:["Vollkorn"] },
+  { id:"129", name:"Rührei Kräuter", category:"Eier / Sandwiches", price:9.5, options:["Vollkorn"] },
+  { id:"242", name:"Rührei Natur", category:"Eier / Sandwiches", price:9.0, options:["Vollkorn"] },
+  { id:"244", name:"Rührei Schinken", category:"Eier / Sandwiches", price:11.0, options:["Vollkorn"] },
+  { id:"283", name:"Rührei Bacon", category:"Eier / Sandwiches", price:11.0, options:["Vollkorn"] },
+  { id:"243", name:"Spiegeleier Natur", category:"Eier / Sandwiches", price:9.0, options:["Vollkorn"] },
+  { id:"284", name:"Spiegeleier Bacon", category:"Eier / Sandwiches", price:11.0, options:["Vollkorn"] },
+  { id:"245", name:"Spiegeleier Schinken", category:"Eier / Sandwiches", price:11.0, options:["Vollkorn"] },
+  { id:"119", name:"Omlette Natur", category:"Eier / Sandwiches", price:9.8, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"138", name:"Kaseomlette", category:"Eier / Sandwiches", price:11.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"140", name:"Schinken-Champignon Omlette", category:"Eier / Sandwiches", price:13.1, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"142", name:"Bauernomlette", category:"Eier / Sandwiches", price:15.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"144", name:"Toast Mozzarella", category:"Eier / Sandwiches", price:15.2, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
+  { id:"145", name:"Toast Schafskäse & Ei", category:"Eier / Sandwiches", price:15.3, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
+  { id:"146", name:"Toast Lachs", category:"Eier / Sandwiches", price:14.6, options:["2 Besteck", "3 Besteck", "4 Besteck", "Vollkorn"] },
+  { id:"147", name:"Rucolabaguette + Schinken", category:"Eier / Sandwiches", price:13.8, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"148", name:"Kasebaguette", category:"Eier / Sandwiches", price:10.1, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"149", name:"Schinkenbaguette", category:"Eier / Sandwiches", price:10.1, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"150", name:"Salamibaguette", category:"Eier / Sandwiches", price:11.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"180", name:"Club Sandwich Classic", category:"Eier / Sandwiches", price:13.3, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"181", name:"Club Sandwich Mango", category:"Eier / Sandwiches", price:13.8, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"230", name:"Joghurt + Früchte", category:"Frische Früchte", price:10.0, options:["2 Besteck"] },
+  { id:"231", name:"Quark + Früchte", category:"Frische Früchte", price:11.0, options:["3 Besteck"] },
+  { id:"232", name:"Obstsalat", category:"Frische Früchte", price:10.0, options:["4 Besteck"] },
+  { id:"233", name:"Müsli + Früchte", category:"Frische Früchte", price:11.0, options:["5 Besteck"] },
+  { id:"234", name:"Cornflakes Pur", category:"Frische Früchte", price:5.9, options:["6 Besteck", "Laktosefrei"] },
+  { id:"287", name:"Gem. Eis / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:7.2, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"288", name:"Gem. Eis + Sahne / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:9.0, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"289", name:"Kids Cup / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:6.7, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"290", name:"Tutti Fruity / Eissorten -> Zusatztext", category:"Eisbecher /Shakes", price:10.6, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"291", name:"Bananensplit", category:"Eisbecher /Shakes", price:9.5, options:[] },
+  { id:"292", name:"Eiskaffee", category:"Eisbecher /Shakes", price:8.5, options:[] },
+  { id:"293", name:"Eisschokolade", category:"Eisbecher /Shakes", price:8.5, options:[] },
+  { id:"294", name:"Heiss-Kalt", category:"Eisbecher /Shakes", price:6.7, options:[] },
+  { id:"295", name:"Tokio", category:"Eisbecher /Shakes", price:8.5, options:[] },
+  { id:"296", name:"Metro", category:"Eisbecher /Shakes", price:8.5, options:[] },
+  { id:"297", name:"Dresden", category:"Eisbecher /Shakes", price:7.5, options:[] },
+  { id:"300", name:"Passion", category:"Eisbecher /Shakes", price:8.7, options:[] },
+  { id:"302", name:"Sunday", category:"Eisbecher /Shakes", price:8.7, options:[] },
+  { id:"303", name:"Monday", category:"Eisbecher /Shakes", price:8.7, options:[] },
+  { id:"304", name:"Bergamo", category:"Eisbecher /Shakes", price:8.7, options:[] },
+  { id:"305", name:"Kugel Eis", category:"Eisbecher /Shakes", price:2.7, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"306", name:"+ 1 Extra Kugel Eis", category:"Eisbecher /Shakes", price:2.2, options:["Vanille", "Schoko", "Mango-Limette", "Zitrone-Basilikum", "gebrannte Mandel", "Kaffee-Crunch", "Pannacotta-Himbeere", "Joghurt-Waldbeere"] },
+  { id:"106", name:"Portion Sahne -> Küche", category:"Eisbecher /Shakes", price:1.9, options:[] },
+  { id:"121", name:"Linsensuppe", category:"Vorspeisen / Salate", price:7.9, options:[] },
+  { id:"122", name:"Kartoffel-Kürbis Suppe", category:"Vorspeisen / Salate", price:8.5, options:[] },
+  { id:"182", name:"Suppe Der Woche", category:"Vorspeisen / Salate", price:8.5, options:[] },
+  { id:"188", name:"Suppe Der Woche Vegetarisch", category:"Vorspeisen / Salate", price:8.5, options:[] },
+  { id:"164", name:"Bruschetta Classic 8 Stk", category:"Vorspeisen / Salate", price:9.2, options:[] },
+  { id:"176", name:"Bruschetta Olive 6 Stk", category:"Vorspeisen / Salate", price:8.6, options:[] },
+  { id:"177", name:"Bruschetta Pesto & Schinken 6 Stk", category:"Vorspeisen / Salate", price:8.6, options:[] },
+  { id:"178", name:"Bruschetta Pesto 6 Stk", category:"Vorspeisen / Salate", price:8.6, options:[] },
+  { id:"120", name:"Bruschetta Mix", category:"Vorspeisen / Salate", price:10.2, options:[] },
+  { id:"179", name:"Hummus", category:"Vorspeisen / Salate", price:12.3, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"159", name:"Gebackener Camembert", category:"Vorspeisen / Salate", price:14.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"127", name:"kleiner Beilagensalat (Feldsalat)", category:"Vorspeisen / Salate", price:5.5, options:[] },
+  { id:"130", name:"kleiner Gemischter Salat", category:"Vorspeisen / Salate", price:8.4, options:[] },
+  { id:"131", name:"grosser Gemischter Salat", category:"Vorspeisen / Salate", price:12.0, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"132", name:"Schafskäsesalat", category:"Vorspeisen / Salate", price:14.7, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"134", name:"Rucolasalat", category:"Vorspeisen / Salate", price:15.2, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"135", name:"Caprese (Tomate-Mozarella)", category:"Vorspeisen / Salate", price:15.8, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"175", name:"Feldsalat an Maultaschen", category:"Vorspeisen / Salate", price:14.7, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"123", name:"Menü 1", category:"Hauptspeisen / Pasta", price:11.0, options:[] },
+  { id:"124", name:"Menü 2 Vegetarisch", category:"Hauptspeisen / Pasta", price:11.0, options:[] },
+  { id:"160", name:"Wiener Schnitzel", category:"Hauptspeisen / Pasta", price:12.8, options:["Bratkartoffeln", "Schwenkkartoffeln", "Preisselbeeren"] },
+  { id:"169", name:"1/2 Portion Wiener Schnitzel", category:"Hauptspeisen / Pasta", price:18.0, options:["Bratkartoffeln", "Schwenkkartoffeln", "Preisselbeeren"] },
+  { id:"163", name:"Linsen-Möhren Curry", category:"Hauptspeisen / Pasta", price:15.8, options:[] },
+  { id:"154", name:"Rumpsteak & Kartoffeln", category:"Hauptspeisen / Pasta", price:28.8, options:["Bratkartoffeln"] },
+  { id:"128", name:"Lachsfilet & Spinat", category:"Hauptspeisen / Pasta", price:27.0, options:[] },
+  { id:"174", name:"Serviettenknödel", category:"Hauptspeisen / Pasta", price:18.1, options:[] },
+  { id:"173", name:"Vegetarische Reispfanne", category:"Hauptspeisen / Pasta", price:14.8, options:[] },
+  { id:"162", name:"Spinatkäsespätzle", category:"Hauptspeisen / Pasta", price:16.8, options:[] },
+  { id:"168", name:"Caramelle Gorgonzola", category:"Hauptspeisen / Pasta", price:16.8, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"165", name:"Tagliatelle Pilzragout", category:"Hauptspeisen / Pasta", price:16.0, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"170", name:"Gnocchi Ziegenkäse", category:"Hauptspeisen / Pasta", price:17.0, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"167", name:"Spaghetti Napoli", category:"Hauptspeisen / Pasta", price:12.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"141", name:"Spaghetti Pesto", category:"Hauptspeisen / Pasta", price:12.7, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"118", name:"Spaghetti Garnele", category:"Hauptspeisen / Pasta", price:21.3, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei", "extra Garnele"] },
+  { id:"161", name:"Spinat-Schafskäse Lasagne", category:"Hauptspeisen / Pasta", price:15.7, options:["2 Besteck", "3 Besteck", "4 Besteck", "glutenfrei"] },
+  { id:"274", name:"Spaghetti Kinder", category:"Hauptspeisen / Pasta", price:6.0, options:["glutenfrei"] },
+  { id:"411", name:"Gutenfrei", category:"Hauptspeisen / Pasta", price:1.0, options:[] },
+  { id:"80", name:"Apfelkuchen vegan", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"81", name:"Käsekuchen", category:"Kuchen / Desserts", price:4.8, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"83", name:"Schokokuchen", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"85", name:"Orangenkuchen glutenfree", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"87", name:"Karrottenkuchen", category:"Kuchen / Desserts", price:4.8, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"88", name:"Brownie", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"93", name:"Mohnkuchen", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"95", name:"Bananenkuchen", category:"Kuchen / Desserts", price:4.5, options:["2 Besteck", "3 Besteck", "4 Besteck", "Sahne", "Kugel Eis"] },
+  { id:"82", name:"Monkey Dream", category:"Kuchen / Desserts", price:8.2, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"101", name:"Squirrles Nibble", category:"Kuchen / Desserts", price:8.7, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"102", name:"Death By Chocolate", category:"Kuchen / Desserts", price:9.2, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"103", name:"Pomme", category:"Kuchen / Desserts", price:8.4, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"104", name:"Pomme Royale", category:"Kuchen / Desserts", price:9.2, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"105", name:"Portion Sahne", category:"Kuchen / Desserts", price:1.9, options:[] },
+  { id:"98", name:"Kaiserschmarrn", category:"Kuchen / Desserts", price:15.3, options:["Eis getrennt", "ohne Rosinen", "2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"110", name:"Creme Brulée", category:"Kuchen / Desserts", price:8.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"11", name:"Crepe Nuss Nougat", category:"Kuchen / Desserts", price:9.7, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"112", name:"Crepe Backapfel", category:"Kuchen / Desserts", price:11.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"113", name:"Crepe Banane", category:"Kuchen / Desserts", price:11.0, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"114", name:"Crepe Marmelade", category:"Kuchen / Desserts", price:9.1, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"158", name:"Crepe Zucker & Zimt", category:"Kuchen / Desserts", price:9.1, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"157", name:"Crepe Vanile Quark", category:"Kuchen / Desserts", price:11.0, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"90", name:"Apfelstrudel Pur", category:"Kuchen / Desserts", price:9.5, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"96", name:"Apfelstrudel + Vanillesauce", category:"Kuchen / Desserts", price:10.4, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"97", name:"Apfelstrudel + Eis + Sahne", category:"Kuchen / Desserts", price:11.0, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"189", name:"Käseplatte Feigensenf", category:"Kuchen / Desserts", price:13.0, options:["2 Besteck", "3 Besteck", "4 Besteck"] },
+  { id:"530", name:"Brandstifter Ginger", category:"Longdrinks", price:9.0, options:[] },
+  { id:"516", name:"Campari Orange", category:"Longdrinks", price:9.5, options:[] },
+  { id:"517", name:"Campari Soda", category:"Longdrinks", price:9.0, options:[] },
+  { id:"518", name:"Cuba Libre", category:"Longdrinks", price:9.5, options:[] },
+  { id:"506", name:"Cynar Tonic", category:"Longdrinks", price:8.5, options:[] },
+  { id:"523", name:"Fernet Cola", category:"Longdrinks", price:9.0, options:[] },
+  { id:"520", name:"Gin Tonic Xix", category:"Longdrinks", price:9.0, options:[] },
+  { id:"521", name:"Gin Lemon Xix", category:"Longdrinks", price:9.0, options:[] },
+  { id:"514", name:"Labarabarba", category:"Longdrinks", price:10.0, options:[] },
+  { id:"524", name:"Lillet Tonic", category:"Longdrinks", price:8.5, options:[] },
+  { id:"525", name:"Pisco Cola", category:"Longdrinks", price:9.0, options:[] },
+  { id:"515", name:"Rum Cola", category:"Longdrinks", price:9.0, options:[] },
+  { id:"538", name:"Scotch Soda", category:"Longdrinks", price:9.0, options:[] },
+  { id:"528", name:"Southern Ginger", category:"Longdrinks", price:8.5, options:[] },
+  { id:"643", name:"Spanische Milch", category:"Longdrinks", price:8.2, options:[] },
+  { id:"531", name:"Tequila Silver Tonic", category:"Longdrinks", price:9.0, options:[] },
+  { id:"533", name:"Tullamore Ginger", category:"Longdrinks", price:9.0, options:[] },
+  { id:"505", name:"Wermut Tonic", category:"Longdrinks", price:10.0, options:[] },
+  { id:"537", name:"Whiskey Cola", category:"Longdrinks", price:10.0, options:[] },
+  { id:"534", name:"Wodka Lemon", category:"Longdrinks", price:9.0, options:[] },
+  { id:"519", name:"Wodka Maracuja", category:"Longdrinks", price:10.0, options:[] },
+  { id:"637", name:"Wodka Mate", category:"Longdrinks", price:10.0, options:[] },
+  { id:"535", name:"Wodka Orange", category:"Longdrinks", price:10.0, options:[] },
+  { id:"522", name:"Wodka Soda", category:"Longdrinks", price:9.0, options:[] },
+  { id:"536", name:"Wodka Tonic", category:"Longdrinks", price:9.0, options:[] },
+  { id:"676", name:"Portwein Fine Twany", category:"Aperitif 5cl", price:5.0, options:["auf Eis"] },
+  { id:"668", name:"Lilliet Blanc", category:"Aperitif 5cl", price:5.2, options:["auf Eis"] },
+  { id:"665", name:"Sherry Fino", category:"Aperitif 5cl", price:5.0, options:["auf Eis"] },
+  { id:"672", name:"Campari", category:"Aperitif 5cl", price:5.2, options:["auf Eis"] },
+  { id:"669", name:"Noilly Prat", category:"Aperitif 5cl", price:5.2, options:["auf Eis"] },
+  { id:"670", name:"Antica Formular", category:"Aperitif 5cl", price:6.2, options:["auf Eis"] },
+  { id:"674", name:"Pernod", category:"Pastis 2cl", price:5.0, options:[] },
+  { id:"675", name:"Ricard", category:"Pastis 2cl", price:5.0, options:[] },
+  { id:"600", name:"Pisco", category:"Schnaps 2 cl", price:5.2, options:["auf Eis"] },
+  { id:"601", name:"Brandstifter", category:"Schnaps 2 cl", price:3.8, options:["auf Eis"] },
+  { id:"604", name:"Wodka Owls", category:"Schnaps 2 cl", price:3.5, options:["auf Eis"] },
+  { id:"605", name:"Tequila Weiss/Silver", category:"Schnaps 2 cl", price:3.5, options:["auf Eis"] },
+  { id:"606", name:"Tequila Braun/Gold", category:"Schnaps 2 cl", price:3.5, options:["auf Eis"] },
+  { id:"607", name:"Xix Gin", category:"Schnaps 2 cl", price:3.8, options:["auf Eis"] },
+  { id:"608", name:"Mezcal", category:"Schnaps 2 cl", price:4.2, options:["auf Eis"] },
+  { id:"681", name:"Averna", category:"Digestif 2cl", price:3.8, options:["auf Eis"] },
+  { id:"682", name:"Fernet Branca", category:"Digestif 2cl", price:4.2, options:["auf Eis"] },
+  { id:"630", name:"Osborne 103", category:"Digestif 2cl", price:4.2, options:["auf Eis"] },
+  { id:"634", name:"Remy Martin", category:"Digestif 2cl", price:5.8, options:["auf Eis"] },
+  { id:"635", name:"Calvados", category:"Digestif 2cl", price:4.2, options:["auf Eis"] },
+  { id:"673", name:"Cynar", category:"Digestif 2cl", price:3.8, options:["auf Eis"] },
+  { id:"680", name:"Kr23", category:"Digestif 2cl", price:3.7, options:["auf Eis"] },
+  { id:"609", name:"Williams Birne", category:"Digestif 2cl", price:5.8, options:["auf Eis"] },
+  { id:"602", name:"Grappa Tedeschi", category:"Digestif 2cl", price:5.2, options:["auf Eis"] },
+  { id:"648", name:"Baileys", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"649", name:"Sambuca", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"650", name:"Amaretto", category:"Likör 2cl", price:3.0, options:["auf Eis"] },
+  { id:"652", name:"Eierlikör", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"655", name:"Berliner Luft", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"660", name:"Likör 43", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"620", name:"Southern Comfort", category:"Likör 2cl", price:3.5, options:["auf Eis"] },
+  { id:"541", name:"Americano Cocktail", category:"Cocktails", price:11.0, options:[] },
+  { id:"544", name:"Amaretto Sour", category:"Cocktails", price:11.0, options:[] },
+  { id:"509", name:"Averna Sour", category:"Cocktails", price:11.0, options:[] },
+  { id:"198", name:"Absinth Sour", category:"Cocktails", price:13.0, options:[] },
+  { id:"196", name:"Aperol Sour", category:"Cocktails", price:11.0, options:[] },
+  { id:"197", name:"Boogie Boy", category:"Cocktails", price:13.0, options:[] },
+  { id:"543", name:"Black Russian", category:"Cocktails", price:11.5, options:[] },
+  { id:"545", name:"Bloody Mary", category:"Cocktails", price:12.5, options:[] },
+  { id:"546", name:"Boulvardier", category:"Cocktails", price:13.0, options:[] },
+  { id:"561", name:"Berlin Mule Brandstifter", category:"Cocktails", price:11.0, options:[] },
+  { id:"548", name:"Caipirinha", category:"Cocktails", price:12.0, options:[] },
+  { id:"555", name:"Cosmopolitan", category:"Cocktails", price:13.0, options:[] },
+  { id:"552", name:"Daiquiri", category:"Cocktails", price:12.0, options:[] },
+  { id:"551", name:"Dark and Stormy", category:"Cocktails", price:11.0, options:[] },
+  { id:"512", name:"Espresso Martini", category:"Cocktails", price:12.0, options:[] },
+  { id:"598", name:"French 78", category:"Cocktails", price:10.0, options:[] },
+  { id:"597", name:"Gin Basil Smash", category:"Cocktails", price:13.0, options:[] },
+  { id:"556", name:"Gimlet", category:"Cocktails", price:12.0, options:[] },
+  { id:"557", name:"Gin Fizz", category:"Cocktails", price:12.0, options:[] },
+  { id:"559", name:"Honolulu Juicer", category:"Cocktails", price:13.0, options:[] },
+  { id:"560", name:"Lebowski (White Russian)", category:"Cocktails", price:12.0, options:[] },
+  { id:"558", name:"London Mule Gin", category:"Cocktails", price:11.0, options:[] },
+  { id:"553", name:"Mandarin Dream", category:"Cocktails", price:12.0, options:[] },
+  { id:"562", name:"Spicy Margarita", category:"Cocktails", price:12.0, options:[] },
+  { id:"563", name:"Marshmellow Lemo", category:"Cocktails", price:13.0, options:[] },
+  { id:"581", name:"Marhula", category:"Cocktails", price:12.0, options:[] },
+  { id:"511", name:"Mezcal Margarita", category:"Cocktails", price:13.0, options:[] },
+  { id:"578", name:"Mexican Mule Tequila", category:"Cocktails", price:11.0, options:[] },
+  { id:"577", name:"Moscow Mule Wodka", category:"Cocktails", price:11.0, options:[] },
+  { id:"510", name:"Mezcal Sour", category:"Cocktails", price:13.0, options:[] },
+  { id:"580", name:"Mai Tai", category:"Cocktails", price:14.0, options:[] },
+  { id:"513", name:"Manhatten Classic", category:"Cocktails", price:12.0, options:[] },
+  { id:"564", name:"Martini Dry Cocktail", category:"Cocktails", price:11.0, options:[] },
+  { id:"565", name:"Mojito", category:"Cocktails", price:12.5, options:[] },
+  { id:"573", name:"Mezca Mule", category:"Cocktails", price:11.0, options:[] },
+  { id:"576", name:"New York Sour", category:"Cocktails", price:13.0, options:[] },
+  { id:"566", name:"Negroni", category:"Cocktails", price:12.0, options:[] },
+  { id:"628", name:"Old Fashioned", category:"Cocktails", price:12.5, options:[] },
+  { id:"575", name:"Orange Thyme Smash", category:"Cocktails", price:13.0, options:[] },
+  { id:"571", name:"Torino Smash", category:"Cocktails", price:12.5, options:[] },
+  { id:"568", name:"Pisco Sour", category:"Cocktails", price:12.5, options:[] },
+  { id:"579", name:"Whiskey Sour", category:"Cocktails", price:13.0, options:[] },
+  { id:"540", name:"Eiweiß statt AquaFaba", category:"Cocktails", price:1.0, options:[] },
+  { id:"584", name:"Capi Ginger", category:"alkoholfreie Cocktails", price:8.0, options:[] },
+  { id:"588", name:"Mosquito", category:"alkoholfreie Cocktails", price:8.0, options:[] },
+  { id:"590", name:"Pony Cocktail", category:"alkoholfreie Cocktails", price:8.0, options:[] },
+  { id:"593", name:"S.C. Cocktail", category:"alkoholfreie Cocktails", price:9.0, options:[] },
+  { id:"594", name:"Virgin Mary", category:"alkoholfreie Cocktails", price:8.0, options:[] },
+  { id:"627", name:"Bulleit 95", category:"Whiskey 2cl", price:5.9, options:["auf Eis", "Wasser"] },
+  { id:"617", name:"Ballentines", category:"Whiskey 2cl", price:5.2, options:["auf Eis", "Wasser"] },
+  { id:"616", name:"Canadian", category:"Whiskey 2cl", price:5.2, options:["auf Eis", "Wasser"] },
+  { id:"624", name:"Four Roses", category:"Whiskey 2cl", price:5.9, options:["auf Eis", "Wasser"] },
+  { id:"625", name:"Glenmorangie", category:"Whiskey 2cl", price:6.9, options:["auf Eis", "Wasser"] },
+  { id:"622", name:"Glenfiddich", category:"Whiskey 2cl", price:6.9, options:["auf Eis", "Wasser"] },
+  { id:"621", name:"Jack Daniels", category:"Whiskey 2cl", price:5.9, options:["auf Eis", "Wasser"] },
+  { id:"623", name:"Laphroig", category:"Whiskey 2cl", price:6.9, options:["auf Eis", "Wasser"] },
+  { id:"626", name:"Makers Mark", category:"Whiskey 2cl", price:5.9, options:["auf Eis", "Wasser"] },
+  { id:"619", name:"Tullamore", category:"Whiskey 2cl", price:5.2, options:["auf Eis", "Wasser"] },
+  { id:"482", name:"Tabu Grün", category:"Absinth 2cl", price:6.0, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
+  { id:"485", name:"Tabu Dry", category:"Absinth 2cl", price:6.0, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
+  { id:"486", name:"Tabu Classic 73%", category:"Absinth 2cl", price:6.5, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
+  { id:"469", name:"Tabu Red", category:"Absinth 2cl", price:6.0, options:["auf Eis", "Wasser", "Zuckerlöffel"] },
+  { id:"640", name:"Cuate 13", category:"Rum 2cl", price:5.2, options:["auf Eis"] },
+  { id:"641", name:"Cuate 4", category:"Rum 2cl", price:4.8, options:["auf Eis"] },
+  { id:"642", name:"Cuate 1", category:"Rum 2cl", price:4.4, options:["auf Eis"] },
+  { id:"701", name:"Zweiter Baguette Korb (4 Scheiben)", category:"Küche Extras", price:1.5, options:[] },
+  { id:"266", name:"Portion Oliven", category:"Küche Extras", price:2.4, options:[] },
+  { id:"702", name:"Ketchup", category:"Küche Extras", price:1.0, options:[] },
+  { id:"703", name:"Meeretich", category:"Küche Extras", price:1.0, options:[] },
+  { id:"704", name:"Senf", category:"Küche Extras", price:1.0, options:[] },
+  { id:"705", name:"Parmesan", category:"Küche Extras", price:1.0, options:[] },
+  { id:"711", name:"Majonaise", category:"Küche Extras", price:1.0, options:[] },
+  { id:"116", name:"Extra Chilli", category:"Küche Extras", price:1.0, options:[] },
+  { id:"707", name:"Portion Garnelen 3.Stk.", category:"Küche Extras", price:9.9, options:[] },
+  { id:"708", name:"+ 1 Extra Garnele", category:"Küche Extras", price:3.3, options:[] },
+  { id:"270", name:"Portion Bratkartoffeln", category:"Küche Extras", price:6.0, options:[] },
+  { id:"712", name:"Portion Reis", category:"Küche Extras", price:4.0, options:[] },
+  { id:"990", name:"Extra Sosse", category:"Küche Extras", price:1.0, options:[] },
+  { id:"246", name:"minus Ei + Eier Im Glas", category:"Küche Extras", price:3.0, options:[] },
+  { id:"247", name:"minus Ei + Rührei", category:"Küche Extras", price:3.0, options:[] },
+  { id:"248", name:"minus Ei + Spiegelei", category:"Küche Extras", price:1.1, options:[] },
+  { id:"251", name:"Vollkorn Brötchen", category:"Küche Extras", price:0.9, options:[] },
+  { id:"252", name:"Brötchen", category:"Küche Extras", price:0.8, options:[] },
+  { id:"253", name:"Scheibe Brot", category:"Küche Extras", price:0.6, options:[] },
+  { id:"254", name:"Croissant", category:"Küche Extras", price:1.7, options:[] },
+  { id:"255", name:"Butter", category:"Küche Extras", price:0.55, options:[] },
+  { id:"256", name:"Marmelade", category:"Küche Extras", price:2.0, options:[] },
+  { id:"257", name:"Honig", category:"Küche Extras", price:0.8, options:[] },
+  { id:"258", name:"Gekochtes Ei", category:"Küche Extras", price:2.0, options:[] },
+  { id:"259", name:"Scheibe Kochschinken", category:"Küche Extras", price:1.0, options:[] },
+  { id:"260", name:"Scheibe roher Schinken", category:"Küche Extras", price:1.0, options:[] },
+  { id:"261", name:"Portion Salami", category:"Küche Extras", price:2.0, options:[] },
+  { id:"262", name:"Scheibe Gouda", category:"Küche Extras", price:1.0, options:[] },
+  { id:"263", name:"Ganze Avocado", category:"Küche Extras", price:2.8, options:[] },
+  { id:"264", name:"Portion Trauben", category:"Küche Extras", price:2.5, options:[] },
+  { id:"265", name:"Ganze Grapefruit", category:"Küche Extras", price:2.0, options:[] },
+  { id:"267", name:"Portion Rührei (2 Eier/Ohne Toast)", category:"Küche Extras", price:2.7, options:[] },
+  { id:"277", name:"Portion Spiegeleier ((2 Eier/Ohne Toast)", category:"Küche Extras", price:2.9, options:[] },
+  { id:"268", name:"Portion Putenbrust", category:"Küche Extras", price:2.2, options:[] },
+  { id:"269", name:"Nutella", category:"Küche Extras", price:0.8, options:[] },
+  { id:"271", name:"Belegtes Brötchen Mit Lachs", category:"Küche Extras", price:3.35, options:[] },
+  { id:"272", name:"Portion Schafskäse", category:"Küche Extras", price:2.75, options:[] },
+  { id:"273", name:"Portion Bacon", category:"Küche Extras", price:1.95, options:[] },
+  { id:"275", name:"Portion Mozarella", category:"Küche Extras", price:2.75, options:[] },
+  { id:"133", name:"Portion Lachs", category:"Küche Extras", price:3.4, options:[] },
 ];
 
 /* ════════════════════════════════════════════════════════════════
    STATE & PERSISTENCE
 ════════════════════════════════════════════════════════════════ */
 const STORE_KEY     = 'waiter-app-v1';
-const MENU_KEY      = 'waiter-menu-v2';
+const MENU_KEY      = 'waiter-menu-v3';
 const SETTINGS_KEY  = 'waiter-settings-v1';
 // Clear old menu data so new CSV menu loads fresh
 localStorage.removeItem('waiter-menu-v1');
@@ -1780,13 +1826,18 @@ function renderTables() {
     const card = document.createElement('div');
     card.className = 'table-card status-' + status;
     card.innerHTML = `
-      <div class="tc-badge"></div>
-      <div class="tc-number">${t}</div>
-      <div class="tc-label">${status === 'free' ? 'Free' : status === 'billed' ? 'Bill ready' : 'Active'}</div>
-      ${status !== 'free' ? `
-        <div class="tc-info">${count} item${count !== 1 ? 's' : ''}</div>
-        <div class="tc-total">${fmtPrice(total)}</div>
-      ` : '<div class="tc-info" style="margin-top:16px;font-size:11px">Tap to open</div>'}
+      <div class="tc-row">
+        <div>
+          <div class="tc-number">${t}</div>
+          <div class="tc-label">${status === 'free' ? 'Free' : status === 'billed' ? 'Bill ready' : 'Active'}</div>
+        </div>
+        ${status !== 'free' ? `
+          <div class="tc-right">
+            <div class="tc-total">${fmtPrice(total)}</div>
+            <div class="tc-info">${count} item${count !== 1 ? 's' : ''}</div>
+          </div>
+        ` : ''}
+      </div>
     `;
     card.addEventListener('click', () => navigate('table', { tableId: t }));
     grid.appendChild(card);
@@ -1826,12 +1877,9 @@ function renderTableView() {
   if (items.length === 0) {
     list.style.display = 'none';
     empty.style.display = 'block';
-    fab.classList.add('fab-empty');
-    document.getElementById('empty-order-cta').onclick = openSheet;
   } else {
     list.style.display = 'flex';
     empty.style.display = 'none';
-    fab.classList.remove('fab-empty');
     items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'order-item';
@@ -1897,7 +1945,7 @@ document.getElementById('btn-close-session').addEventListener('click', () => {
 /* ════════════════════════════════════════════════════════════════
    FAB / ADD ITEM SHEET
 ════════════════════════════════════════════════════════════════ */
-let selectedCat = 'All';
+let selectedCat = null;
 
 document.getElementById('fab-add').addEventListener('click', openSheet);
 
@@ -1905,9 +1953,9 @@ function openSheet() {
   document.getElementById('sheet-add').classList.add('open');
   document.getElementById('search-input').value = '';
   document.getElementById('search-clear').classList.remove('visible');
-  selectedCat = 'All';
+  selectedCat = null;
   renderCatPills();
-  renderMenuResults('', 'All');
+  renderMenuResults('', null);
   setTimeout(() => document.getElementById('search-input').focus(), 350);
 }
 
@@ -1918,8 +1966,22 @@ function closeSheet() {
 document.getElementById('sheet-backdrop').addEventListener('click', closeSheet);
 
 function renderCatPills() {
-  const cats = ['All', ...new Set(menu.map(i => i.category))];
+  const cats = [...new Set(menu.map(i => i.category))];
   const row = document.getElementById('sheet-cats');
+  const catHeader = document.getElementById('sheet-cat-header');
+  const catTitle = document.getElementById('sheet-cat-title');
+
+  if (selectedCat) {
+    row.classList.remove('cats-fullscreen');
+    row.classList.add('hidden');
+    catHeader.classList.remove('hidden');
+    catTitle.textContent = selectedCat;
+  } else {
+    row.classList.add('cats-fullscreen');
+    row.classList.remove('hidden');
+    catHeader.classList.add('hidden');
+  }
+
   row.innerHTML = cats.map(c =>
     `<button class="cat-pill${c === selectedCat ? ' active' : ''}" data-cat="${c}">${c}</button>`
   ).join('');
@@ -1935,6 +1997,14 @@ function renderCatPills() {
   });
 }
 
+document.getElementById('btn-cat-back').addEventListener('click', () => {
+  selectedCat = null;
+  document.getElementById('search-input').value = '';
+  searchClear.classList.remove('visible');
+  renderCatPills();
+  renderMenuResults('', null);
+});
+
 function highlight(text, query) {
   if (!query) return escHtml(text);
   const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') + ')', 'gi');
@@ -1945,8 +2015,13 @@ function renderMenuResults(query, cat) {
   const q = query.trim().toLowerCase();
   const container = document.getElementById('menu-results');
 
+  if (!q && !cat) {
+    container.innerHTML = '';
+    return;
+  }
+
   let items = menu;
-  if (!q && cat && cat !== 'All') items = items.filter(i => i.category === cat);
+  if (!q && cat) items = items.filter(i => i.category === cat);
   if (q) items = items.filter(i =>
     i.name.toLowerCase().includes(q) ||
     i.id.includes(q) ||
@@ -1988,8 +2063,10 @@ const searchClear = document.getElementById('search-clear');
 document.getElementById('search-input').addEventListener('input', (e) => {
   const q = e.target.value;
   searchClear.classList.toggle('visible', q.length > 0);
-  if (q.length > 0 && selectedCat !== 'All') {
-    selectedCat = 'All';
+  if (q.length > 0 && selectedCat !== null) {
+    selectedCat = null;
+    renderCatPills();
+  } else if (q.length === 0 && selectedCat === null) {
     renderCatPills();
   }
   renderMenuResults(q, selectedCat);
@@ -2090,10 +2167,6 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
   const input = document.getElementById('search-input');
   input.value = '';
   searchClear.classList.remove('visible');
-  if (selectedCat !== 'All') {
-    selectedCat = 'All';
-    renderCatPills();
-  }
   renderMenuResults('', selectedCat);
 });
 
@@ -2225,7 +2298,7 @@ function renderBillContent(session) {
     const showQty  = isSettled ? item.qty : owed;
     const lineAmt  = isSettled ? item.price * item.qty : item.price * owed;
     const selCount = splitSelected.get(item.id) || 0;
-    const selClass = isSettled ? 'settled'
+    const selClass = isSettled ? ' settled'
                    : selCount === 0        ? ''
                    : selCount >= owed      ? ' sel-full'
                    : ' sel-partial';
@@ -2373,7 +2446,13 @@ function renderHistory() {
     return;
   }
 
-  container.innerHTML = Object.entries(byDate).map(([date, dateSessions]) => {
+  const clearBar = `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px;">
+      <button id="btn-clear-today-inline" style="height:34px;padding:0 14px;background:rgba(239,68,68,.12);color:var(--red);border-radius:8px;font-size:13px;font-weight:600;border:none;cursor:pointer;">Clear all</button>
+    </div>
+  `;
+
+  container.innerHTML = clearBar + Object.entries(byDate).map(([date, dateSessions]) => {
     const dayTotal = dateSessions.reduce((sum, s) => sum + sessionTotal(s), 0);
     return `
       <div class="history-day-header">${fmtDate(date)} · ${fmtPrice(dayTotal)}</div>
@@ -2409,7 +2488,6 @@ function renderHistory() {
       const s = sessions.find(s => s.id === sid);
       if (!s) return;
 
-      // If closed and want to re-open
       if (s.status === 'closed') {
         s.status = 'active';
         s.endTime = null;
@@ -2418,6 +2496,18 @@ function renderHistory() {
       navigate('table', { tableId: s.tableId });
     });
   });
+
+  const clearInline = document.getElementById('btn-clear-today-inline');
+  if (clearInline) {
+    clearInline.addEventListener('click', () => {
+      showConfirm('Clear all today\'s orders?', 'All sessions from today will be permanently deleted. This cannot be undone.', () => {
+        const today = todayStr();
+        sessions = sessions.filter(s => s.date !== today);
+        saveData();
+        renderHistory();
+      });
+    });
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
