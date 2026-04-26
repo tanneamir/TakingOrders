@@ -30,6 +30,15 @@
       --header-h: 56px;
       --sheet-radius: 20px;
     }
+    :root.light {
+      --bg:       #f5f5f5;
+      --bg2:      #ffffff;
+      --bg3:      #ebebeb;
+      --border:   #d4d4d4;
+      --text:     #111111;
+      --text2:    #555555;
+      --text3:    #999999;
+    }
     html, body {
       height: 100%; width: 100%;
       background: var(--bg);
@@ -709,8 +718,11 @@
       padding: 14px 16px;
       margin-bottom: 2px;
       display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .settings-row label { flex: 1; font-size: 15px; }
+    .settings-row:active { background: var(--bg3); }
+    .settings-row label { flex: 1; font-size: 15px; cursor: pointer; }
     .settings-row input[type="number"] {
       width: 70px; height: 36px; text-align: center;
       background: var(--bg3); color: var(--text);
@@ -985,11 +997,23 @@
     <!-- ── Settings View ──────────────────────────────────── -->
     <section id="view-settings" class="view">
       <div class="settings-section">
+        <div class="settings-label">My Areas</div>
+        <label class="settings-row"><span style="flex:1;font-size:15px">Theater</span><input type="checkbox" class="area-check" data-area="Theater" /></label>
+        <label class="settings-row"><span style="flex:1;font-size:15px">Zirkus</span><input type="checkbox" class="area-check" data-area="Zirkus" /></label>
+        <label class="settings-row"><span style="flex:1;font-size:15px">Vorgarten</span><input type="checkbox" class="area-check" data-area="Vorgarten" /></label>
+        <label class="settings-row"><span style="flex:1;font-size:15px">Hofgarten</span><input type="checkbox" class="area-check" data-area="Hofgarten" /></label>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-label">Appearance</div>
+        <label class="settings-row">
+          <span style="flex:1;font-size:15px">Light mode</span>
+          <input type="checkbox" id="set-light-mode" />
+        </label>
+      </div>
+
+      <div class="settings-section">
         <div class="settings-label">General</div>
-        <div class="settings-row">
-          <label>Number of tables</label>
-          <input type="number" id="set-tables" value="10" min="1" max="50" />
-        </div>
         <div class="settings-row">
           <label>Currency symbol</label>
           <input type="text" id="set-currency" value="€" maxlength="3" />
@@ -1787,6 +1811,7 @@ function navigate(view, params = {}) {
   document.getElementById('header-title').textContent =
     view === 'table' ? 'Table ' + currentTableId :
     view === 'history' ? 'Today\'s Orders' :
+    view === 'tables' && settings.areas && settings.areas.length ? settings.areas.join(' · ') :
     views[view] || 'Tables';
 
   renderHeaderActions(view);
@@ -1816,10 +1841,39 @@ document.getElementById('btn-back').addEventListener('click', () => {
 /* ════════════════════════════════════════════════════════════════
    TABLES VIEW
 ════════════════════════════════════════════════════════════════ */
+const AREA_TABLES = {
+  Theater:   { min: 1,  max: 39 },
+  Zirkus:    { min: 40, max: 54 },
+  Vorgarten: { min: 60, max: 67 },
+  Hofgarten: { min: 75, max: 86 },
+};
+
+function getActiveTables() {
+  const areas = settings.areas && settings.areas.length ? settings.areas : null;
+  if (!areas) {
+    const tables = [];
+    for (let t = 1; t <= settings.tableCount; t++) tables.push(t);
+    return tables;
+  }
+  const tables = new Set();
+  areas.forEach(area => {
+    const r = AREA_TABLES[area];
+    if (r) for (let t = r.min; t <= r.max; t++) tables.add(t);
+  });
+  return [...tables].sort((a, b) => a - b);
+}
+
 function renderTables() {
   const grid = document.getElementById('tables-grid');
   grid.innerHTML = '';
-  for (let t = 1; t <= settings.tableCount; t++) {
+  const tables = getActiveTables();
+
+  if (tables.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text3);font-size:15px">No areas selected.<br>Choose your areas in Settings.</div>';
+    return;
+  }
+
+  for (const t of tables) {
     const status  = getTableStatus(t);
     const session = getActiveSession(t);
     const total   = session ? sessionTotal(session) : 0;
@@ -2520,19 +2574,41 @@ function renderHistory() {
 /* ════════════════════════════════════════════════════════════════
    SETTINGS VIEW
 ════════════════════════════════════════════════════════════════ */
-function loadSettingsForm() {
-  document.getElementById('set-tables').value   = settings.tableCount;
-  document.getElementById('set-currency').value = settings.currency;
-  document.getElementById('set-name').value     = settings.restaurantName || '';
+function applyTheme() {
+  document.documentElement.classList.toggle('light', !!settings.lightMode);
 }
 
-['set-tables','set-currency','set-name'].forEach(id => {
+function loadSettingsForm() {
+  document.getElementById('set-currency').value     = settings.currency;
+  document.getElementById('set-name').value         = settings.restaurantName || '';
+  document.getElementById('set-light-mode').checked = !!settings.lightMode;
+  const areas = settings.areas || [];
+  document.querySelectorAll('.area-check').forEach(cb => {
+    cb.checked = areas.includes(cb.dataset.area);
+  });
+}
+
+document.querySelectorAll('.area-check').forEach(cb => {
+  cb.addEventListener('change', () => {
+    settings.areas = [...document.querySelectorAll('.area-check:checked')].map(c => c.dataset.area);
+    saveSettings();
+    renderHeaderActions(currentView);
+    if (currentView === 'tables') { navigate('tables'); }
+  });
+});
+
+['set-currency','set-name'].forEach(id => {
   document.getElementById(id).addEventListener('change', () => {
-    settings.tableCount    = parseInt(document.getElementById('set-tables').value) || 10;
     settings.currency      = document.getElementById('set-currency').value || '₪';
     settings.restaurantName= document.getElementById('set-name').value.trim();
     saveSettings();
   });
+});
+
+document.getElementById('set-light-mode').addEventListener('change', (e) => {
+  settings.lightMode = e.target.checked;
+  saveSettings();
+  applyTheme();
 });
 
 document.getElementById('btn-import-menu').addEventListener('click', () => {
@@ -3023,6 +3099,7 @@ function escHtml(str) {
 /* ════════════════════════════════════════════════════════════════
    BOOT
 ════════════════════════════════════════════════════════════════ */
+applyTheme();
 renderTables();
 renderHeaderActions('tables');
 </script>
