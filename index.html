@@ -390,12 +390,14 @@
     }
     .sheet-cats.hidden { display: none; }
     .cat-pill {
-      height: 44px;
+      min-height: 44px;
       border-radius: 12px;
       background: var(--bg3);
       border: 1px solid var(--border);
       font-size: 13px; font-weight: 600; color: var(--text2);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      white-space: normal; word-break: break-word;
+      padding: 8px 16px;
+      line-height: 1.3;
       transition: background .15s, color .15s, border-color .15s;
     }
     .cat-pill.active { background: var(--accent); border-color: var(--accent); color: #111; }
@@ -2063,13 +2065,16 @@ const searchClear = document.getElementById('search-clear');
 document.getElementById('search-input').addEventListener('input', (e) => {
   const q = e.target.value;
   searchClear.classList.toggle('visible', q.length > 0);
-  if (q.length > 0 && selectedCat !== null) {
+  const row = document.getElementById('sheet-cats');
+  const catHeader = document.getElementById('sheet-cat-header');
+  if (q.length > 0) {
+    row.classList.add('hidden');
+    catHeader.classList.add('hidden');
+  } else {
     selectedCat = null;
     renderCatPills();
-  } else if (q.length === 0 && selectedCat === null) {
-    renderCatPills();
   }
-  renderMenuResults(q, selectedCat);
+  renderMenuResults(q, q.length > 0 ? null : selectedCat);
 });
 
 searchClear.addEventListener('click', () => {
@@ -2077,6 +2082,7 @@ searchClear.addEventListener('click', () => {
   input.value = '';
   searchClear.classList.remove('visible');
   input.focus();
+  renderCatPills();
   renderMenuResults('', selectedCat);
 });
 
@@ -2167,6 +2173,7 @@ document.getElementById('btn-confirm-item').addEventListener('click', () => {
   const input = document.getElementById('search-input');
   input.value = '';
   searchClear.classList.remove('visible');
+  renderCatPills();
   renderMenuResults('', selectedCat);
 });
 
